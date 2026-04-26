@@ -1,0 +1,5 @@
+image:
+  repository: hrms/auth-service
+  tag: latest
+
+replicaCount: 2
