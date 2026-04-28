@@ -1,0 +1,182 @@
+### Auth Service API Tests
+### Base URL and Variables
+@baseUrl = http://localhost:8081/api/auth
+@contentType = application/json
+
+###
+### Health Check
+###
+
+GET {{baseUrl}}/health
+Content-Type: {{contentType}}
+
+###
+### Register New User - Success Case
+###
+
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser1",
+  "email": "testuser1@example.com",
+  "password": "SecurePass123!"
+}
+
+###
+### Register New User - Second User
+###
+
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser2",
+  "email": "testuser2@example.com",
+  "password": "SecurePass456!"
+}
+
+###
+### Register Duplicate Username - Should Fail
+###
+
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser1",
+  "email": "different@example.com",
+  "password": "AnotherPass789!"
+}
+
+###
+### Register Duplicate Email - Should Fail
+###
+
+POST {{baseUrl}}/register
+Content-Type: {{contentType}}
+
+{
+  "username": "differentuser",
+  "email": "testuser1@example.com",
+  "password": "AnotherPass789!"
+}
+
+###
+### Login - Valid Credentials
+###
+
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser1",
+  "password": "SecurePass123!"
+}
+
+###
+### Login - Invalid Password - Should Fail
+###
+
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "testuser1",
+  "password": "WrongPassword"
+}
+
+###
+### Login - Nonexistent User - Should Fail
+###
+
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "username": "nonexistentuser",
+  "password": "SomePassword123"
+}
+
+###
+### Refresh Token - Valid Token
+### Note: Replace TOKEN with actual refresh token from login response
+###
+
+POST {{baseUrl}}/refresh
+Content-Type: {{contentType}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+
+###
+### Get Current User - Requires Valid Access Token
+### Note: Replace TOKEN with actual access token from login response
+###
+
+GET {{baseUrl}}/me
+Content-Type: {{contentType}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+
+###
+### Get Current User - No Token - Should Fail
+###
+
+GET {{baseUrl}}/me
+Content-Type: {{contentType}}
+
+###
+### Get Current User - Invalid Token - Should Fail
+###
+
+GET {{baseUrl}}/me
+Content-Type: {{contentType}}
+Authorization: Bearer invalid.token.here
+
+###
+### Get User by ID - Requires Valid Access Token
+### Note: Replace 1 with actual user ID and TOKEN with valid access token
+###
+
+GET {{baseUrl}}/user/1
+Content-Type: {{contentType}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+
+###
+### Get User by ID - No Token - Should Fail
+###
+
+GET {{baseUrl}}/user/1
+Content-Type: {{contentType}}
+
+###
+### Get User by ID - Nonexistent User - Should Fail
+### Note: Replace TOKEN with actual valid access token
+###
+
+GET {{baseUrl}}/user/99999
+Content-Type: {{contentType}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder
+
+###
+### Actuator Health Endpoint
+###
+
+GET http://localhost:8081/actuator/health
+Content-Type: {{contentType}}
+
+###
+### Actuator Metrics
+###
+
+GET http://localhost:8081/actuator/metrics
+Content-Type: {{contentType}}
+
+###
+### Test CORS - Preflight Request
+###
+
+OPTIONS {{baseUrl}}/register
+Origin: http://localhost:3000
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: Content-Type
+
+###
