@@ -1,6 +1,24 @@
-version: "3.9"
-
 services:
+
+  api-gateway:
+    build:
+      context: ../../gateway
+    container_name: hrms-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - AUTH_SERVICE_URL=http://auth-service:8080
+      - USER_SERVICE_URL=http://user-service:8082
+      - EMPLOYEE_SERVICE_URL=http://employee-service:8083
+      - PAYROLL_SERVICE_URL=http://payroll-service:8084
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - auth-service
+    networks:
+      - hrms-network
+    restart: unless-stopped
 
   postgres:
     image: postgres:16
@@ -9,11 +27,13 @@ services:
     environment:
       POSTGRES_DB: hrms_auth
       POSTGRES_USER: hrms
-      POSTGRES_PASSWORD: hrms
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - hrms-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -21,6 +41,9 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - hrms-network
+    restart: unless-stopped
 
   auth-service:
     build:
@@ -34,9 +57,15 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_auth
       SPRING_DATASOURCE_USERNAME: hrms
-      SPRING_DATASOURCE_PASSWORD: hrms
+      SPRING_DATASOURCE_PASSWORD: ""
       SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
+    networks:
+      - hrms-network
+    restart: unless-stopped
+
+networks:
+  hrms-network:
+    driver: bridge
 
 volumes:
   postgres_data:
