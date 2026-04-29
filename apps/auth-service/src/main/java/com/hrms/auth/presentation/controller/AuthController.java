@@ -1,11 +1,15 @@
 package com.hrms.auth.presentation.controller;
 
+import java.util.UUID;
+
 import com.hrms.auth.application.dto.AuthResponse;
 import com.hrms.auth.application.dto.LoginRequest;
 import com.hrms.auth.application.dto.RegisterRequest;
 import com.hrms.auth.application.dto.UserDTO;
 import com.hrms.auth.application.service.AuthService;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +74,7 @@ public class AuthController {
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID userId) {
         log.info("Getting user info for userId: {}", userId);
         UserDTO user = authService.getUserById(userId);
         return ResponseEntity.ok(user);

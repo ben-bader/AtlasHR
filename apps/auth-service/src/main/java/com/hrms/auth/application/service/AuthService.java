@@ -2,6 +2,7 @@ package com.hrms.auth.application.service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -181,7 +182,7 @@ public class AuthService implements UserDetailsService {
         }
     }
 
-    public UserDTO getUserById(Long userId) {
+    public UserDTO getUserById(UUID userId) {
         return userRepository.findById(userId)
                 .map(this::convertToDTO)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
