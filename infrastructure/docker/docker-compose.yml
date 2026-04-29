@@ -1,11 +1,26 @@
 services:
 
+  frontend:
+    build:
+      context: ../../apps/frontend
+    container_name: hrms-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://api-gateway:3001/api
+    depends_on:
+      - api-gateway
+    networks:
+      - hrms-network
+    restart: unless-stopped
+
   api-gateway:
     build:
       context: ../../gateway
     container_name: hrms-api-gateway
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=development
       - PORT=3000
