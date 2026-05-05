@@ -60,77 +60,85 @@ public class AuthService implements UserDetailsService {
         this.passwordEncoderProvider = passwordEncoderProvider;
     }
 
-    public AuthResponse register(RegisterRequest request) {
-        try {
-            if (userRepository.existsByUsername(request.getUsername())) {
-                log.warn("Registration failed: Username {} already exists", request.getUsername());
-                return AuthResponse.builder()
-                        .message("Username already exists")
-                        .build();
-            }
-
-            if (userRepository.existsByEmail(request.getEmail())) {
-                log.warn("Registration failed: Email {} already exists", request.getEmail());
-                return AuthResponse.builder()
-                        .message("Email already exists")
-                        .build();
-            }
-
-            PasswordEncoder encoder = passwordEncoderProvider.getIfAvailable();
-            if (encoder == null) {
-                throw new RuntimeException("PasswordEncoder not available");
-            }
-
-            Role userRole = roleRepository.findByName("USER")
-                    .orElseGet(() -> {
-                        Role role = Role.builder()
-                                .name("USER")
-                                .description("Default user role")
-                                .build();
-                        return roleRepository.save(role);
-                    });
-
-            User user = User.builder()
-                    .username(request.getUsername())
-                    .email(request.getEmail())
-                    .password(encoder.encode(request.getPassword()))
-                    .enabled(true)
-                    .accountNonExpired(true)
-                    .accountNonLocked(true)
-                    .credentialsNonExpired(true)
-                    .roles(new HashSet<>(Set.of(userRole)))
-                    .build();
-
-            // Publish user.created event
-            String roles = savedUser.getRoles().stream()
-                    .map(Role::getName)
-                    .collect(Collectors.joining(","));
-            UserEvent event = UserEvent.builder()
-                    .eventType("user.created")
-                    .userId(savedUser.getId().toString())
-                    .username(savedUser.getUsername())
-                    .email(savedUser.getEmail())
-                    .timestamp(LocalDateTime.now())
-                    .roles(roles)
-                    .build();
-            eventPublisher.publishUserCreatedEvent(event);
-
-            User savedUser = userRepository.save(user);
-            log.info("User registered successfully: {}", savedUser.getUsername());
-
+ public AuthResponse register(RegisterRequest request) {
+    try {
+        // 1️⃣ Check duplicates
+        if (userRepository.existsByUsername(request.getUsername())) {
+            log.warn("Registration failed: Username {} already exists", request.getUsername());
             return AuthResponse.builder()
-                    .userId(savedUser.getId())
-                    .username(savedUser.getUsername())
-                    .message("User registered successfully")
-                    .build();
-        } catch (Exception e) {
-            log.error("Registration error: {}", e.getMessage(), e);
-            return AuthResponse.builder()
-                    .message("Registration failed: " + e.getMessage())
+                    .message("Username already exists")
                     .build();
         }
-    }
 
+        if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("Registration failed: Email {} already exists", request.getEmail());
+            return AuthResponse.builder()
+                    .message("Email already exists")
+                    .build();
+        }
+
+        // 2️⃣ Get encoder
+        PasswordEncoder encoder = passwordEncoderProvider.getIfAvailable();
+        if (encoder == null) {
+            throw new RuntimeException("PasswordEncoder bean not found");
+        }
+
+        // 3️⃣ Get or create default role
+        Role userRole = roleRepository.findByName("USER")
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder()
+                                .name("USER")
+                                .description("Default user role")
+                                .build()
+                ));
+
+        // 4️⃣ Build user (NOT saved yet)
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(encoder.encode(request.getPassword()))
+                .enabled(true)
+                .accountNonExpired(true)
+                .accountNonLocked(true)
+                .credentialsNonExpired(true)
+                .roles(new HashSet<>(Set.of(userRole)))
+                .build();
+
+        // 5️⃣ SAVE USER FIRST  ✅
+        User savedUser = userRepository.save(user);
+
+        // 6️⃣ Publish event AFTER save (ID exists now) ✅
+        String roles = savedUser.getRoles()
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.joining(","));
+
+        UserEvent event = UserEvent.builder()
+                .eventType("user.created")
+                .userId(savedUser.getId().toString())
+                .username(savedUser.getUsername())
+                .email(savedUser.getEmail())
+                .timestamp(LocalDateTime.now())
+                .roles(roles)
+                .build();
+
+        eventPublisher.publishUserCreatedEvent(event);
+
+        log.info("User registered successfully: {}", savedUser.getUsername());
+
+        return AuthResponse.builder()
+                .userId(savedUser.getId())
+                .username(savedUser.getUsername())
+                .message("User registered successfully")
+                .build();
+
+    } catch (Exception e) {
+        log.error("Registration error: {}", e.getMessage(), e);
+        return AuthResponse.builder()
+                .message("Registration failed: " + e.getMessage())
+                .build();
+    }
+}
     public AuthResponse login(LoginRequest request) {
         try {
             AuthenticationManager authManager = authenticationManagerProvider.getIfAvailable();
