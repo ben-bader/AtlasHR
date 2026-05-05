@@ -1,0 +1,24 @@
+replicaCount: 1
+
+image:
+  repository: hrms/employee-service
+  pullPolicy: Always
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+
+config:
+  databaseUrl: "jdbc:postgresql://postgres:5432/hrms_employee_db"
+  rabbitmqHost: "rabbitmq"
+  rabbitmqPort: "5672"

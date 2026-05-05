@@ -1,0 +1,58 @@
+services:
+  employee-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrms-employee-service
+
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8083
+
+      # =====================================
+      # DATABASE (Docker network hostname)
+      # =====================================
+      SPRING_DATASOURCE_URL: jdbc:postgresql://hrms-postgres:5432/hrms_employee
+      SPRING_DATASOURCE_USERNAME: hrms
+      SPRING_DATASOURCE_PASSWORD: hrms_pass
+
+      # =====================================
+      # RABBITMQ (Docker network hostname)
+      # =====================================
+      SPRING_RABBITMQ_HOST: hrms-rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: hrms
+      SPRING_RABBITMQ_PASSWORD: hrms_pass
+
+      # =====================================
+      # REDIS (Docker network hostname)
+      # =====================================
+      SPRING_DATA_REDIS_HOST: hrms-redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+      # =====================================
+      # GATEWAY TRUST
+      # =====================================
+      GATEWAY_ENABLED: "true"
+
+    ports:
+      - "8083:8083"
+
+    networks:
+      - hrms-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+
+networks:
+  hrms-network:
+    name: hrms-network
+    external: true

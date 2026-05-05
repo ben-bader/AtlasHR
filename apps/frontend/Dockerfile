@@ -1,50 +1,48 @@
-# Build stage
+# =========================
+# BUILD STAGE
+# =========================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# deterministic install (IMPORTANT FIX)
+RUN npm ci
 
-# Copy source code
 COPY . .
 
-# Build Next.js application
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_APP_NAME
+
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
+
 RUN npm run build
 
-# Runtime stage
+
+# =========================
+# RUNTIME STAGE
+# =========================
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Set NODE_ENV to production
 ENV NODE_ENV=production
 
-# Copy package files
+# install only production deps
 COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Install production dependencies only
-RUN npm install --omit=dev
-
-# Copy built application from builder
-COPY --from=builder /app/.next ./.next
+# copy standalone build (BEST PRACTICE)
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
-COPY --from=builder /app/package.json ./package.json
 
-# Expose port
 EXPOSE 3000
 
-# Create a simple health check script
-RUN echo '#!/bin/sh' > /healthcheck.sh && \
-    echo 'wget --quiet --tries=1 --spider http://localhost:3000/ || exit 1' >> /healthcheck.sh && \
-    chmod +x /healthcheck.sh
+# healthcheck using node (no curl/wget dependency)
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', r => process.exit(r.statusCode === 200 ? 0 : 1))"
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-  CMD /healthcheck.sh
-
-# Start application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

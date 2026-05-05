@@ -1,85 +1,64 @@
 services:
 
-  frontend:
-    build:
-      context: ../../apps/frontend
-    container_name: hrms-frontend
-    ports:
-      - "3000:3000"
+  # ── RabbitMQ (shared message broker) ──────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: hrms-rabbitmq
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://api-gateway:3001/api
-    depends_on:
-      - api-gateway
+      RABBITMQ_DEFAULT_USER: hrms
+      RABBITMQ_DEFAULT_PASS: hrms_pass
+    ports:
+      - "5672:5672"
+      - "15672:15672"    # management UI → localhost:15672
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - hrms-network
     restart: unless-stopped
 
-  api-gateway:
-    build:
-      context: ../../gateway
-    container_name: hrms-api-gateway
-    ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - AUTH_SERVICE_URL=http://auth-service:8080
-      - USER_SERVICE_URL=http://user-service:8082
-      - EMPLOYEE_SERVICE_URL=http://employee-service:8083
-      - PAYROLL_SERVICE_URL=http://payroll-service:8084
-      - FRONTEND_URL=http://localhost:3000
-    depends_on:
-      - auth-service
-    networks:
-      - hrms-network
-    restart: unless-stopped
-
+  # ── Postgres (one instance, multiple databases) ────────────────
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: hrms-postgres
-    restart: always
     environment:
-      POSTGRES_DB: hrms_auth
       POSTGRES_USER: hrms
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: hrms_pass
+      POSTGRES_DB: hrms_auth   # default db, others created by init script
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - hrms-network
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: hrms-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # creates all DBs
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hrms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - hrms-network
     restart: unless-stopped
 
-  auth-service:
-    build:
-      context: ../../apps/auth-service
-    container_name: auth-service
+  # ── Redis (shared cache / session store) ──────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: hrms-redis
     ports:
-      - "8081:8080"
-    depends_on:
-      - postgres
-      - rabbitmq
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hrms_auth
-      SPRING_DATASOURCE_USERNAME: hrms
-      SPRING_DATASOURCE_PASSWORD: ""
-      SPRING_RABBITMQ_HOST: rabbitmq
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - hrms-network
     restart: unless-stopped
 
 networks:
   hrms-network:
+    name: hrms-network          # named so other compose files can join it
     driver: bridge
 
 volumes:

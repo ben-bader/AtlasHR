@@ -26,9 +26,12 @@ import com.hrms.auth.domain.model.Role;
 import com.hrms.auth.domain.model.User;
 import com.hrms.auth.domain.repository.RoleRepository;
 import com.hrms.auth.domain.repository.UserRepository;
+import com.hrms.auth.infrastructure.event.UserEvent;
+import com.hrms.auth.infrastructure.event.UserEventPublisher;
 import com.hrms.auth.infrastructure.security.JwtTokenProvider;
 
 import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
@@ -46,6 +49,9 @@ public class AuthService implements UserDetailsService {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    @Autowired
+    private UserEventPublisher eventPublisher;
 
     public AuthService(
             ObjectProvider<AuthenticationManager> authenticationManagerProvider,
@@ -94,6 +100,20 @@ public class AuthService implements UserDetailsService {
                     .credentialsNonExpired(true)
                     .roles(new HashSet<>(Set.of(userRole)))
                     .build();
+
+            // Publish user.created event
+            String roles = savedUser.getRoles().stream()
+                    .map(Role::getName)
+                    .collect(Collectors.joining(","));
+            UserEvent event = UserEvent.builder()
+                    .eventType("user.created")
+                    .userId(savedUser.getId().toString())
+                    .username(savedUser.getUsername())
+                    .email(savedUser.getEmail())
+                    .timestamp(LocalDateTime.now())
+                    .roles(roles)
+                    .build();
+            eventPublisher.publishUserCreatedEvent(event);
 
             User savedUser = userRepository.save(user);
             log.info("User registered successfully: {}", savedUser.getUsername());

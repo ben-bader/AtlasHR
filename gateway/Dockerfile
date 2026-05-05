@@ -1,33 +1,39 @@
-# Build stage
+# =========================
+# BUILD STAGE
+# =========================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install --omit=dev
+COPY . .
 
-# Runtime stage
+# optional: if you later add TS
+# RUN npm run build
+
+
+# =========================
+# RUNTIME STAGE
+# =========================
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy built dependencies from builder
-COPY --from=builder /app/node_modules ./node_modules
+ENV NODE_ENV=production
 
-# Copy source code
 COPY package*.json ./
-COPY src ./src
-COPY .env.example ./
+RUN npm ci --omit=dev
 
-# Expose port
+COPY --from=builder /app/src ./src
+
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+# improved healthcheck (real HTTP check)
+HEALTHCHECK --interval=20s --timeout=5s --retries=5 \
+  CMD node -e "http=require('http'); \
+  http.get('http://localhost:3000/health', r=>process.exit(r.statusCode===200?0:1)) \
+  .on('error',()=>process.exit(1));"
 
-# Start application
 CMD ["node", "src/index.js"]
