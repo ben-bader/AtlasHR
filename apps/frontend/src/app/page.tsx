@@ -2,8 +2,21 @@
 
 import { LoginForm } from "@/components/login-form"
 import { GalleryVerticalEndIcon } from "lucide-react"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/lib/store/auth"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const { isAuthenticated } = useAuthStore()
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+    }
+  }, [isAuthenticated, router])
+
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -12,7 +25,7 @@ export default function LoginPage() {
             <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <GalleryVerticalEndIcon className="size-4" />
             </div>
-            Acme Inc.
+            AtlasHR
           </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
