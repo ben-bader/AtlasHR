@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { authAPI, AuthResponse, UserDTO } from "@/lib/api/auth";
 import { setTokens, clearTokens } from "@/lib/utils/token";
+import { RegisterRequest } from "@/lib/types";
+import { AxiosError } from "axios";
 
 export interface AuthState {
   user: UserDTO | null;
@@ -11,6 +13,7 @@ export interface AuthState {
 
   // Actions
   login: (username: string, password: string) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   fetchCurrentUser: () => Promise<void>;
   setError: (error: string | null) => void;
@@ -40,8 +43,39 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || "Login failed";
+    } catch (error) {
+      const errorMessage = (error as AxiosError)?.message || "Login failed";
+      set({
+        error: errorMessage,
+        isLoading: false,
+        isAuthenticated: false,
+      });
+      throw error;
+    }
+  },
+
+  register: async (data: RegisterRequest) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await authAPI.register(data);
+      // After successful registration, auto-login if endpoint returns token
+      if (response.token) {
+        setTokens(response.token, response.refreshToken);
+        set({
+          token: response.token,
+          user: {
+            id: response.userId,
+            username: response.username,
+          },
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } else {
+        // If no token returned, registration was successful but needs manual login
+        set({ isLoading: false });
+      }
+    } catch (error) {
+      const errorMessage = (error as AxiosError)?.message || "Registration failed";
       set({
         error: errorMessage,
         isLoading: false,
@@ -71,7 +105,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-    } catch (error: any) {
+    } catch {
       set({
         error: "Failed to fetch user",
         isLoading: false,

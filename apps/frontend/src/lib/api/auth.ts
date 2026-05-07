@@ -1,4 +1,9 @@
+/**
+ * Authentication API client
+ */
+
 import api from "@/lib/api/axios";
+import { RegisterRequest } from "@/lib/types";
 
 export interface LoginRequest {
   username: string;
@@ -17,11 +22,20 @@ export interface UserDTO {
   id: string;
   username: string;
   email?: string;
+  enabled?: boolean;
+  roles?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const authAPI = {
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/auth/login", credentials);
+    return response.data;
+  },
+
+  register: async (data: RegisterRequest): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>("/auth/register", data);
     return response.data;
   },
 
