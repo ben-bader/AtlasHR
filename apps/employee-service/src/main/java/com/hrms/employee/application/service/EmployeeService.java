@@ -72,9 +72,7 @@ public class EmployeeService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .phone(request.getPhone())
-                .aadharNumber(request.getAadharNumber())
-                .panNumber(request.getPanNumber())
+                .CIN(request.getCIN())
                 .personalInfo(PersonalInfo.builder()
                         .dateOfBirth(request.getDateOfBirth())
                         .gender(request.getGender())
@@ -87,13 +85,13 @@ public class EmployeeService {
                         .alternatePhone(request.getAlternatePhone())
                         .currentAddress(request.getCurrentAddress())
                         .city(request.getCity())
-                        .state(request.getState())
-                        .postalCode(request.getPostalCode())
+                        .province(request.getProvince())
+                        .codePostal(request.getCodePostal())
                         .build())
                 .bankDetails(BankDetails.builder()
                         .accountHolderName(request.getAccountHolderName())
                         .accountNumber(request.getAccountNumber())
-                        .ifscCode(request.getIfscCode())
+                        .RIB(request.getRIB())
                         .bankName(request.getBankName())
                         .accountType(request.getAccountType())
                         .build())
@@ -261,7 +259,7 @@ public class EmployeeService {
      * Get all employees in a department
      */
     public List<EmployeeResponse> getEmployeesByDepartment(Long departmentId) {
-        List<Employee> employees = employeeRepository.findByDepartmentDepartmentId(departmentId);
+        List<Employee> employees = employeeRepository.findEmployeesByDepartmentId(departmentId);
         return employees.stream().map(this::mapToResponse).toList();
     }
 
@@ -277,7 +275,7 @@ public class EmployeeService {
      * Get direct reports for a manager
      */
     public List<EmployeeResponse> getDirectReports(String managerId) {
-        List<Employee> employees = employeeRepository.findByReportingManagerEmployeeId(managerId);
+        List<Employee> employees = employeeRepository.findByReportingManager_EmployeeId(managerId);
         return employees.stream().map(this::mapToResponse).toList();
     }
 
@@ -292,7 +290,17 @@ public class EmployeeService {
 
         employee.setFirstName(request.getFirstName());
         employee.setLastName(request.getLastName());
-        employee.setPhone(request.getPhone());
+        
+        // Update contact info
+        if (employee.getContactInfo() == null) {
+            employee.setContactInfo(new ContactInfo());
+        }
+        employee.getContactInfo().setPrimaryPhone(request.getPrimaryPhone());
+        employee.getContactInfo().setAlternatePhone(request.getAlternatePhone());
+        employee.getContactInfo().setCurrentAddress(request.getCurrentAddress());
+        employee.getContactInfo().setCity(request.getCity());
+        employee.getContactInfo().setProvince(request.getProvince());
+        employee.getContactInfo().setCodePostal(request.getCodePostal());
 
         employee = employeeRepository.save(employee);
 
@@ -344,8 +352,9 @@ public class EmployeeService {
     }
 
     private void updateOrganizationChartEntry(Employee employee) {
-        Optional<OrganizationChart> existingChart = organizationChartRepository.findByEmployeeId(employee.getEmployeeId());
-        if (existingChart.isPresent()) {
+Optional<OrganizationChart> existingChart =
+    organizationChartRepository.findByEmployee_EmployeeId(employee.getEmployeeId());   
+         if (existingChart.isPresent()) {
             OrganizationChart chart = existingChart.get();
             organizationChartRepository.save(chart);
         }
@@ -411,14 +420,13 @@ public class EmployeeService {
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
                 .email(employee.getEmail())
-                .phone(employee.getPhone())
-                .aadharNumber(employee.getAadharNumber())
-                .panNumber(employee.getPanNumber())
+                .CIN(employee.getCIN())
                 .joiningDate(employee.getJoiningDate())
                 .dateOfBirth(employee.getPersonalInfo() != null ? employee.getPersonalInfo().getDateOfBirth() : null)
                 .gender(employee.getPersonalInfo() != null ? employee.getPersonalInfo().getGender() : null)
                 .nationality(employee.getPersonalInfo() != null ? employee.getPersonalInfo().getNationality() : null)
                 .bloodGroup(employee.getPersonalInfo() != null ? employee.getPersonalInfo().getBloodGroup() : null)
+                .maritalStatus(employee.getPersonalInfo() != null ? employee.getPersonalInfo().getMaritalStatus() : null)
                 .status(employee.getStatus())
                 .departmentName(employee.getDepartment().getDepartmentName())
                 .departmentId(employee.getDepartment().getDepartmentId())
@@ -427,13 +435,20 @@ public class EmployeeService {
                 .reportingManagerName(employee.getReportingManager() != null ? employee.getReportingManager().getFullName() : null)
                 .reportingManagerId(employee.getReportingManager() != null ? employee.getReportingManager().getEmployeeId() : null)
                 .grade(employee.getGrade())
+                // Contact Information
                 .primaryPhone(employee.getContactInfo() != null ? employee.getContactInfo().getPrimaryPhone() : null)
+                .alternatePhone(employee.getContactInfo() != null ? employee.getContactInfo().getAlternatePhone() : null)
                 .currentAddress(employee.getContactInfo() != null ? employee.getContactInfo().getCurrentAddress() : null)
                 .city(employee.getContactInfo() != null ? employee.getContactInfo().getCity() : null)
-                .state(employee.getContactInfo() != null ? employee.getContactInfo().getState() : null)
-                .postalCode(employee.getContactInfo() != null ? employee.getContactInfo().getPostalCode() : null)
+                .province(employee.getContactInfo() != null ? employee.getContactInfo().getProvince() : null)
+                .codePostal(employee.getContactInfo() != null ? employee.getContactInfo().getCodePostal() : null)
+                // Bank Details
                 .bankName(employee.getBankDetails() != null ? employee.getBankDetails().getBankName() : null)
                 .accountNumber(employee.getBankDetails() != null ? employee.getBankDetails().getAccountNumber() : null)
+                .RIB(employee.getBankDetails() != null ? employee.getBankDetails().getRIB() : null)
+                .accountHolderName(employee.getBankDetails() != null ? employee.getBankDetails().getAccountHolderName() : null)
+                .accountType(employee.getBankDetails() != null ? employee.getBankDetails().getAccountType() : null)
+                // Insurance
                 .insurances(insuranceResponses)
                 .build();
     }

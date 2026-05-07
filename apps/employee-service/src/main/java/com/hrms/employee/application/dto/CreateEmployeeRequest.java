@@ -10,12 +10,11 @@ import java.time.LocalDate;
 @Builder
 public class CreateEmployeeRequest {
 
+    // Personal Information
     private String firstName;
     private String lastName;
     private String email;
-    private String phone;
-    private String aadharNumber;
-    private String panNumber;
+    private String CIN; // Carte d'Identité Nationale
 
     private LocalDate dateOfBirth;
     private String gender;
@@ -23,19 +22,22 @@ public class CreateEmployeeRequest {
     private String bloodGroup;
     private String maritalStatus;
 
-    private String primaryPhone;
+    // Contact Information (Moroccan format)
+    private String primaryPhone; // Moroccan format: 06XXXXXXXX or +212XXXXXXXXX
     private String alternatePhone;
     private String currentAddress;
-    private String city;
-    private String state;
-    private String postalCode;
+    private String city; // Moroccan city
+    private String province; // Moroccan province
+    private String codePostal; // Moroccan postal code
 
+    // Bank Details (RIB is Moroccan banking standard)
     private String accountHolderName;
     private String accountNumber;
-    private String ifscCode;
+    private String RIB; // Relevé d'Identité Bancaire (Moroccan standard)
     private String bankName;
     private String accountType;
 
+    // Emergency Contact
     private String emergencyContactName;
     private String emergencyContactRelationship;
     private String emergencyContactPhone;
@@ -54,6 +56,7 @@ public class CreateEmployeeRequest {
     private String beneficiaryPhone;
     private String beneficiaryEmail;
 
+    // Employment Information
     private Long departmentId;
     private String designationId;
     private String reportingManagerId;

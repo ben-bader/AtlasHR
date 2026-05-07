@@ -48,15 +48,6 @@
   SERVICES=(
     [auth-service]="$SCRIPT_DIR/apps/auth-service/docker-compose.yml"
     [employee-service]="$SCRIPT_DIR/apps/employee-service/docker-compose.yml"
-    [payroll-service]="$SCRIPT_DIR/apps/payroll-service/docker-compose.yml"
-    [leave-service]="$SCRIPT_DIR/apps/leave-service/docker-compose.yml"
-    [attendance-service]="$SCRIPT_DIR/apps/attendance-service/docker-compose.yml"
-    [recruitment-service]="$SCRIPT_DIR/apps/recruitment-service/docker-compose.yml"
-    [expense-service]="$SCRIPT_DIR/apps/expense-service/docker-compose.yml"
-    [training-service]="$SCRIPT_DIR/apps/training-service/docker-compose.yml"
-    [notification-service]="$SCRIPT_DIR/apps/notification-service/docker-compose.yml"
-    [reporting-service]="$SCRIPT_DIR/apps/reporting-service/docker-compose.yml"
-    [fleet-service]="$SCRIPT_DIR/apps/fleet-service/docker-compose.yml"
     [api-gateway]="$SCRIPT_DIR/apps/api-gateway/docker-compose.yml"
     [frontend]="$SCRIPT_DIR/apps/frontend/docker-compose.yml"
   )
@@ -65,15 +56,6 @@
   SERVICE_ORDER=(
     auth-service
     employee-service
-    payroll-service
-    leave-service
-    attendance-service
-    recruitment-service
-    expense-service
-    training-service
-    notification-service
-    reporting-service
-    fleet-service
     api-gateway
     frontend
   )

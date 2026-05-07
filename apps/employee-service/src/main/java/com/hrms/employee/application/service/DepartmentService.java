@@ -89,7 +89,7 @@ public class DepartmentService {
     }
 
     public List<DepartmentResponse> getSubDepartments(Long parentDepartmentId) {
-        List<Department> departments = departmentRepository.findByParentDepartmentDepartmentId(parentDepartmentId);
+        List<Department> departments = departmentRepository.findByParentDepartment_DepartmentId(parentDepartmentId);
         return departments.stream().map(this::mapToResponse).toList();
     }
 
@@ -102,15 +102,19 @@ public class DepartmentService {
     }
 
     private DepartmentResponse mapToResponse(Department department) {
-        return DepartmentResponse.builder()
-                .departmentId(department.getDepartmentId())
-                .departmentName(department.getDepartmentName())
-                .description(department.getDescription())
-                .departmentCode(department.getDepartmentCode())
-                .departmentHead(department.getDepartmentHead() != null ? department.getDepartmentHead().getFullName() : null)
-                .parentDepartmentId(department.getParentDepartment() != null ? department.getParentDepartment().getDepartmentId() : null)
-                .status(department.getStatus().toString())
-                .build();
+        DepartmentResponse response = new DepartmentResponse();
+        response.setDepartmentId(department.getDepartmentId());
+        response.setDepartmentName(department.getDepartmentName());
+        response.setDescription(department.getDescription());
+        response.setDepartmentCode(department.getDepartmentCode());
+        response.setStatus(department.getStatus().toString());
+        if (department.getParentDepartment() != null) {
+            response.setParentDepartmentId(department.getParentDepartment().getDepartmentId());
+        }
+        if (department.getDepartmentHead() != null) {
+            response.setDepartmentHead(department.getDepartmentHead().getFirstName() + " " + department.getDepartmentHead().getLastName());
+        }
+        return response;
     }
 
 }

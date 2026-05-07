@@ -1,6 +1,5 @@
 package com.hrms.employee.application.service;
 
-import com.hrms.employee.common.utils.IdGeneratorFactory;
 import com.hrms.employee.domain.model.OrganizationChart;
 import com.hrms.employee.domain.repository.OrganizationChartRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -14,26 +13,25 @@ import java.util.List;
 @Transactional
 public class OrganizationChartService {
 
-    private final OrganizationChartRepository organizationChartRepository;
+    private final OrganizationChartRepository repository;
 
-    public OrganizationChartService(OrganizationChartRepository organizationChartRepository) {
-        this.organizationChartRepository = organizationChartRepository;
+    public OrganizationChartService(OrganizationChartRepository repository) {
+        this.repository = repository;
     }
 
     public List<OrganizationChart> getEmployeesByManager(String managerId) {
         log.info("Retrieving org chart for manager: {}", managerId);
-        return organizationChartRepository.findByManagerId(managerId);
+        return repository.findByManager_EmployeeId(managerId);
     }
 
     public List<OrganizationChart> getDepartmentHierarchy(Long departmentId) {
         log.info("Retrieving org chart for department: {}", departmentId);
-        return organizationChartRepository.findByDepartmentDepartmentId(departmentId);
+        return repository.findByDepartment_DepartmentId(departmentId);
     }
 
     public OrganizationChart getEmployeeHierarchy(String employeeId) {
         log.info("Retrieving hierarchy for employee: {}", employeeId);
-        return organizationChartRepository.findByEmployeeId(employeeId)
+        return repository.findByEmployee_EmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee hierarchy not found"));
     }
-
 }

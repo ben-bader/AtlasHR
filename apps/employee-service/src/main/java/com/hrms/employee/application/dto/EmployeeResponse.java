@@ -16,14 +16,13 @@ public class EmployeeResponse {
     private String firstName;
     private String lastName;
     private String email;
-    private String phone;
-    private String aadharNumber;
-    private String panNumber;
+    private String CIN;
     private LocalDate joiningDate;
     private LocalDate dateOfBirth;
     private String gender;
     private String nationality;
     private String bloodGroup;
+    private String maritalStatus;
     private EmploymentStatus status;
     private String departmentName;
     private Long departmentId;
@@ -32,13 +31,23 @@ public class EmployeeResponse {
     private String reportingManagerName;
     private String reportingManagerId;
     private String grade;
+    
+    // Contact Information
     private String primaryPhone;
+    private String alternatePhone;
     private String currentAddress;
     private String city;
-    private String state;
-    private String postalCode;
+    private String province;
+    private String codePostal;
+    
+    // Bank Details
     private String bankName;
     private String accountNumber;
+    private String RIB;
+    private String accountHolderName;
+    private String accountType;
+    
+    // Insurance
     private List<EmployeeInsuranceResponse> insurances;
 
 }

@@ -17,7 +17,7 @@ public class BankDetails {
 
     private String accountHolderName;
     private String accountNumber;
-    private String ifscCode;
+    private String RIB;
     private String bankName;
     private String accountType;
 

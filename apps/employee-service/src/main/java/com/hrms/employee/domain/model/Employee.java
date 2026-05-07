@@ -50,13 +50,8 @@ public class Employee {
     private String email;
 
     @Column(unique = true)
-    private String phone;
+    private String CIN;
 
-    @Column(unique = true)
-    private String aadharNumber;
-
-    @Column(unique = true)
-    private String panNumber;
 
     @Embedded
     private PersonalInfo personalInfo;

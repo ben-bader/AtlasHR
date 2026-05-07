@@ -17,6 +17,9 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
+# docker-compose healthcheck uses wget on /actuator/health
+RUN apk add --no-cache wget
+
 # safer wildcard (avoids version coupling)
 COPY --from=builder /app/target/*.jar app.jar
 
@@ -24,6 +27,6 @@ COPY --from=builder /app/target/*.jar app.jar
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-EXPOSE 8082
+EXPOSE 8083
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

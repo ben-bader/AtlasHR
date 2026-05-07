@@ -15,11 +15,11 @@ import lombok.Setter;
 @Builder
 public class ContactInfo {
 
-    private String primaryPhone;
+    private String primaryPhone;  // Moroccan format: +212XXXXXXXXX or 06/07XXXXXXXX
     private String alternatePhone;
-    private String currentAddress;
-    private String city;
-    private String state;
-    private String postalCode;
+    private String currentAddress; // Street name and number
+    private String city; // Moroccan city
+    private String province; // Moroccan province
+    private String codePostal; // Moroccan postal code
 
 }
