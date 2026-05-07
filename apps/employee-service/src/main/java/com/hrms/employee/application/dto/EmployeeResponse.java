@@ -1,5 +1,6 @@
 package com.hrms.employee.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hrms.employee.common.enums.EmploymentStatus;
 import lombok.*;
 import java.time.LocalDate;
@@ -12,7 +13,8 @@ import java.util.List;
 @Builder
 public class EmployeeResponse {
 
-    private String employeeId;
+    @JsonProperty("employeeId")
+    private String id;
     private String firstName;
     private String lastName;
     private String email;

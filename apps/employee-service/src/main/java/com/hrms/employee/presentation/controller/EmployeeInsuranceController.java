@@ -23,7 +23,7 @@ public class EmployeeInsuranceController {
 
     @PostMapping
     public ResponseEntity<EmployeeInsuranceResponse> addInsurance(@RequestBody AddInsuranceRequest request) {
-        log.info("Adding insurance for employee: {}", request.getEmployeeId());
+        log.info("Adding insurance for employee: {}", request.getId());
         EmployeeInsuranceResponse response = employeeInsuranceService.addInsurance(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

@@ -2,7 +2,7 @@
 
 import { RegisterForm } from "@/components/register-form"
 import { GalleryVerticalEndIcon } from "lucide-react"
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store/auth"
 
@@ -30,7 +30,9 @@ export default function RegisterPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <RegisterForm />
+            <Suspense fallback={<div className="text-sm text-muted-foreground">Loading...</div>}>
+              <RegisterForm />
+            </Suspense>
           </div>
         </div>
       </div>

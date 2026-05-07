@@ -1,5 +1,6 @@
 package com.hrms.employee.application.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
@@ -9,7 +10,8 @@ import lombok.*;
 @Builder
 public class EmployeeSkillResponse {
 
-    private String skillId;
+    @JsonProperty("skillId")
+    private String id;
     private String employeeId;
     private String skillName;
     private String competencyLevel;

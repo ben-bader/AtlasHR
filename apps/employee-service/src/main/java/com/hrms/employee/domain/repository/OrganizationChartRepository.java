@@ -12,18 +12,18 @@ import java.util.Optional;
 @Repository
 public interface OrganizationChartRepository extends JpaRepository<OrganizationChart, String> {
 
-    // correct — chart.employee.employeeId
-    Optional<OrganizationChart> findByEmployee_EmployeeId(String employeeId);
+    // correct — chart.employee.id
+    Optional<OrganizationChart> findByEmployee_Id(String employeeId);
 
     // ❌ removed findByManagerId
     // ✅ correct nested path
-    List<OrganizationChart> findByManager_EmployeeId(String employeeId);
+    List<OrganizationChart> findByManager_Id(String employeeId);
 
     // keep JPQL but fix path clarity
     @Query("""
         SELECT oc 
         FROM OrganizationChart oc 
-        WHERE oc.employee.department.departmentId = :departmentId
+        WHERE oc.employee.department.id = :departmentId
     """)
     List<OrganizationChart> findByDepartment_DepartmentId(@Param("departmentId") Long departmentId);
 }

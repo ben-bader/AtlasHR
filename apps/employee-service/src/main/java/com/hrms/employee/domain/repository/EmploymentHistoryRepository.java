@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface EmploymentHistoryRepository extends JpaRepository<EmploymentHistory, String> {
 
-    @Query("SELECT h FROM EmploymentHistory h WHERE h.employee.employeeId = :employeeId ORDER BY h.effectiveDate DESC")
+    @Query("SELECT h FROM EmploymentHistory h WHERE h.employee.id = :employeeId ORDER BY h.effectiveDate DESC")
     List<EmploymentHistory> findByEmployeeIdOrderByEffectiveDateDesc(@Param("employeeId") String employeeId);
     List<EmploymentHistory> findByChangeType(EmploymentChangeType changeType);
 }

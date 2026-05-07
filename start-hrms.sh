@@ -48,7 +48,7 @@
   SERVICES=(
     [auth-service]="$SCRIPT_DIR/apps/auth-service/docker-compose.yml"
     [employee-service]="$SCRIPT_DIR/apps/employee-service/docker-compose.yml"
-    [api-gateway]="$SCRIPT_DIR/apps/api-gateway/docker-compose.yml"
+    [api-gateway]="$SCRIPT_DIR/gateway/docker-compose.yml"
     [frontend]="$SCRIPT_DIR/apps/frontend/docker-compose.yml"
   )
 

@@ -21,7 +21,7 @@ public class OrganizationChartService {
 
     public List<OrganizationChart> getEmployeesByManager(String managerId) {
         log.info("Retrieving org chart for manager: {}", managerId);
-        return repository.findByManager_EmployeeId(managerId);
+        return repository.findByManager_Id(managerId);
     }
 
     public List<OrganizationChart> getDepartmentHierarchy(Long departmentId) {
@@ -31,7 +31,7 @@ public class OrganizationChartService {
 
     public OrganizationChart getEmployeeHierarchy(String employeeId) {
         log.info("Retrieving hierarchy for employee: {}", employeeId);
-        return repository.findByEmployee_EmployeeId(employeeId)
+        return repository.findByEmployee_Id(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee hierarchy not found"));
     }
 }

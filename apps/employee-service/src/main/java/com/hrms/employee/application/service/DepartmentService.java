@@ -33,7 +33,7 @@ public class DepartmentService {
         log.info("Creating department: {}", request.getDepartmentName());
 
         Department department = Department.builder()
-                .departmentId(idGeneratorFactory.generateDepartmentId())
+                .id(idGeneratorFactory.generateDepartmentId())
                 .departmentName(request.getDepartmentName())
                 .description(request.getDescription())
                 .departmentCode(request.getDepartmentCode())
@@ -53,7 +53,7 @@ public class DepartmentService {
         }
 
         department = departmentRepository.save(department);
-        log.info("Department created: {}", department.getDepartmentId());
+        log.info("Department created: {}", department.getId());
 
         return mapToResponse(department);
     }
@@ -89,7 +89,7 @@ public class DepartmentService {
     }
 
     public List<DepartmentResponse> getSubDepartments(Long parentDepartmentId) {
-        List<Department> departments = departmentRepository.findByParentDepartment_DepartmentId(parentDepartmentId);
+        List<Department> departments = departmentRepository.findByParentDepartment_Id(parentDepartmentId);
         return departments.stream().map(this::mapToResponse).toList();
     }
 
@@ -103,13 +103,13 @@ public class DepartmentService {
 
     private DepartmentResponse mapToResponse(Department department) {
         DepartmentResponse response = new DepartmentResponse();
-        response.setDepartmentId(department.getDepartmentId());
+        response.setId(department.getId());
         response.setDepartmentName(department.getDepartmentName());
         response.setDescription(department.getDescription());
         response.setDepartmentCode(department.getDepartmentCode());
         response.setStatus(department.getStatus().toString());
         if (department.getParentDepartment() != null) {
-            response.setParentDepartmentId(department.getParentDepartment().getDepartmentId());
+            response.setParentDepartmentId(department.getParentDepartment().getId());
         }
         if (department.getDepartmentHead() != null) {
             response.setDepartmentHead(department.getDepartmentHead().getFirstName() + " " + department.getDepartmentHead().getLastName());

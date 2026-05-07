@@ -29,21 +29,21 @@ public class EmployeeController {
 
     @PostMapping("/promote")
     public ResponseEntity<EmployeeResponse> promoteEmployee(@RequestBody PromoteEmployeeRequest request) {
-        log.info("Received request to promote employee: {}", request.getEmployeeId());
+        log.info("Received request to promote employee: {}", request.getId());
         EmployeeResponse response = employeeService.promoteEmployee(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/transfer")
     public ResponseEntity<EmployeeResponse> transferEmployee(@RequestBody TransferEmployeeRequest request) {
-        log.info("Received request to transfer employee: {}", request.getEmployeeId());
+        log.info("Received request to transfer employee: {}", request.getId());
         EmployeeResponse response = employeeService.transferEmployee(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/terminate")
     public ResponseEntity<EmployeeResponse> terminateEmployee(@RequestBody TerminateEmployeeRequest request) {
-        log.info("Received request to terminate employee: {}", request.getEmployeeId());
+        log.info("Received request to terminate employee: {}", request.getId());
         EmployeeResponse response = employeeService.terminateEmployee(request);
         return ResponseEntity.ok(response);
     }

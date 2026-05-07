@@ -17,8 +17,8 @@ import com.hrms.employee.common.enums.SkillStatus;
 public class EmployeeSkill {
 
     @Id
-    @Column(length = 20)
-    private String skillId;
+    @Column(name = "skill_id", length = 20)
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)

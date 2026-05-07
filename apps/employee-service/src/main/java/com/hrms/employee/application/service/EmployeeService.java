@@ -68,7 +68,7 @@ public class EmployeeService {
         }
 
         Employee employee = Employee.builder()
-                .employeeId(idGeneratorFactory.generateEmployeeId())
+                .id(idGeneratorFactory.generateEmployeeId())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
@@ -128,7 +128,7 @@ public class EmployeeService {
         // Publish event
         publishEmployeeCreatedEvent(employee);
 
-        log.info("Employee onboarded successfully: {}", employee.getEmployeeId());
+        log.info("Employee onboarded successfully: {}", employee.getId());
 
         return mapToResponse(employee);
     }
@@ -137,9 +137,9 @@ public class EmployeeService {
      * Promote an employee
      */
     public EmployeeResponse promoteEmployee(PromoteEmployeeRequest request) {
-        log.info("Promoting employee: {}", request.getEmployeeId());
+        log.info("Promoting employee: {}", request.getId());
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException(ApplicationConstants.EMPLOYEE_NOT_FOUND));
 
         if (!employee.isActive()) {
@@ -166,7 +166,7 @@ public class EmployeeService {
         // Publish transfer event (salary revision notification)
         publishEmployeeUpdatedEvent(employee);
 
-        log.info("Employee promoted successfully: {}", employee.getEmployeeId());
+        log.info("Employee promoted successfully: {}", employee.getId());
 
         return mapToResponse(employee);
     }
@@ -175,9 +175,9 @@ public class EmployeeService {
      * Transfer an employee to another department/designation
      */
     public EmployeeResponse transferEmployee(TransferEmployeeRequest request) {
-        log.info("Transferring employee: {}", request.getEmployeeId());
+        log.info("Transferring employee: {}", request.getId());
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException(ApplicationConstants.EMPLOYEE_NOT_FOUND));
 
         if (!employee.isActive()) {
@@ -216,7 +216,7 @@ public class EmployeeService {
         // Publish transfer event
         publishEmployeeTransferredEvent(employee);
 
-        log.info("Employee transferred successfully: {}", employee.getEmployeeId());
+        log.info("Employee transferred successfully: {}", employee.getId());
 
         return mapToResponse(employee);
     }
@@ -225,9 +225,9 @@ public class EmployeeService {
      * Terminate an employee
      */
     public EmployeeResponse terminateEmployee(TerminateEmployeeRequest request) {
-        log.info("Terminating employee: {}", request.getEmployeeId());
+        log.info("Terminating employee: {}", request.getId());
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         if (employee.isTerminated()) {
@@ -241,7 +241,7 @@ public class EmployeeService {
         // Publish termination event
         publishEmployeeTerminatedEvent(employee, request.getTerminationReason());
 
-        log.info("Employee terminated successfully: {}", employee.getEmployeeId());
+        log.info("Employee terminated successfully: {}", employee.getId());
 
         return mapToResponse(employee);
     }
@@ -275,7 +275,7 @@ public class EmployeeService {
      * Get direct reports for a manager
      */
     public List<EmployeeResponse> getDirectReports(String managerId) {
-        List<Employee> employees = employeeRepository.findByReportingManager_EmployeeId(managerId);
+        List<Employee> employees = employeeRepository.findByReportingManager_Id(managerId);
         return employees.stream().map(this::mapToResponse).toList();
     }
 
@@ -317,7 +317,7 @@ public class EmployeeService {
                                        String previousGrade, String newGrade,
                                        String reason) {
         EmploymentHistory history = EmploymentHistory.builder()
-                .historyId(idGeneratorFactory.generateEmploymentHistoryId())
+                .id(idGeneratorFactory.generateEmploymentHistoryId())
                 .employee(employee)
                 .effectiveDate(LocalDate.now())
                 .changeType(changeType)
@@ -343,7 +343,7 @@ public class EmployeeService {
 
     private void createOrganizationChartEntry(Employee employee, Employee manager) {
         OrganizationChart chart = OrganizationChart.builder()
-                .chartId(idGeneratorFactory.generateOrganizationChartId())
+                .id(idGeneratorFactory.generateOrganizationChartId())
                 .employee(employee)
                 .manager(manager)
                 .hierarchyLevel(manager != null ? 2 : 1)
@@ -353,7 +353,7 @@ public class EmployeeService {
 
     private void updateOrganizationChartEntry(Employee employee) {
 Optional<OrganizationChart> existingChart =
-    organizationChartRepository.findByEmployee_EmployeeId(employee.getEmployeeId());   
+    organizationChartRepository.findByEmployee_Id(employee.getId());   
          if (existingChart.isPresent()) {
             OrganizationChart chart = existingChart.get();
             organizationChartRepository.save(chart);
@@ -362,12 +362,12 @@ Optional<OrganizationChart> existingChart =
 
     private void publishEmployeeCreatedEvent(Employee employee) {
         EmployeeCreatedEvent event = EmployeeCreatedEvent.builder()
-                .employeeId(employee.getEmployeeId())
+                .employeeId(employee.getId())
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
                 .email(employee.getEmail())
-                .departmentId(employee.getDepartment().getDepartmentId().toString())
-                .designationId(employee.getDesignation().getDesignationId())
+                .departmentId(employee.getDepartment().getId().toString())
+                .designationId(employee.getDesignation().getId())
                 .joiningDate(employee.getJoiningDate().toString())
                 .build();
         eventPublisher.publishEmployeeCreatedEvent(event);
@@ -375,12 +375,12 @@ Optional<OrganizationChart> existingChart =
 
     private void publishEmployeeUpdatedEvent(Employee employee) {
         EmployeeUpdatedEvent event = EmployeeUpdatedEvent.builder()
-                .employeeId(employee.getEmployeeId())
+                .employeeId(employee.getId())
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
                 .email(employee.getEmail())
-                .departmentId(employee.getDepartment().getDepartmentId().toString())
-                .designationId(employee.getDesignation().getDesignationId())
+                .departmentId(employee.getDepartment().getId().toString())
+                .designationId(employee.getDesignation().getId())
                 .status(employee.getStatus().toString())
                 .build();
         eventPublisher.publishEmployeeUpdatedEvent(event);
@@ -388,9 +388,9 @@ Optional<OrganizationChart> existingChart =
 
     private void publishEmployeeTransferredEvent(Employee employee) {
         EmployeeTransferredEvent event = EmployeeTransferredEvent.builder()
-                .employeeId(employee.getEmployeeId())
+                .employeeId(employee.getId())
                 .employeeName(employee.getFullName())
-                .newDepartmentId(employee.getDepartment().getDepartmentId().toString())
+                .newDepartmentId(employee.getDepartment().getId().toString())
                 .newDesignation(employee.getDesignation().getDesignationName())
                 .effectiveDate(LocalDateTime.now())
                 .build();
@@ -399,11 +399,11 @@ Optional<OrganizationChart> existingChart =
 
     private void publishEmployeeTerminatedEvent(Employee employee, String terminationReason) {
         EmployeeTerminatedEvent event = EmployeeTerminatedEvent.builder()
-                .employeeId(employee.getEmployeeId())
+                .employeeId(employee.getId())
                 .employeeName(employee.getFullName())
                 .email(employee.getEmail())
-                .departmentId(employee.getDepartment().getDepartmentId().toString())
-                .designationId(employee.getDesignation().getDesignationId())
+                .departmentId(employee.getDepartment().getId().toString())
+                .designationId(employee.getDesignation().getId())
                 .lastWorkingDate(employee.getLastWorkingDate().toString())
                 .terminationReason(terminationReason)
                 .build();
@@ -411,12 +411,12 @@ Optional<OrganizationChart> existingChart =
     }
 
     private EmployeeResponse mapToResponse(Employee employee) {
-        List<EmployeeInsurance> insuranceRecords = employeeInsuranceRepository.findByEmployeeId(employee.getEmployeeId());
+        List<EmployeeInsurance> insuranceRecords = employeeInsuranceRepository.findByEmployeeId(employee.getId());
         List<EmployeeInsuranceResponse> insuranceResponses = insuranceRecords.stream()
                 .map(this::mapInsuranceToResponse).toList();
 
         return EmployeeResponse.builder()
-                .employeeId(employee.getEmployeeId())
+                .id(employee.getId())
                 .firstName(employee.getFirstName())
                 .lastName(employee.getLastName())
                 .email(employee.getEmail())
@@ -429,11 +429,11 @@ Optional<OrganizationChart> existingChart =
                 .maritalStatus(employee.getPersonalInfo() != null ? employee.getPersonalInfo().getMaritalStatus() : null)
                 .status(employee.getStatus())
                 .departmentName(employee.getDepartment().getDepartmentName())
-                .departmentId(employee.getDepartment().getDepartmentId())
+                .departmentId(employee.getDepartment().getId())
                 .designationName(employee.getDesignation().getDesignationName())
-                .designationId(employee.getDesignation().getDesignationId())
+                .designationId(employee.getDesignation().getId())
                 .reportingManagerName(employee.getReportingManager() != null ? employee.getReportingManager().getFullName() : null)
-                .reportingManagerId(employee.getReportingManager() != null ? employee.getReportingManager().getEmployeeId() : null)
+                .reportingManagerId(employee.getReportingManager() != null ? employee.getReportingManager().getId() : null)
                 .grade(employee.getGrade())
                 // Contact Information
                 .primaryPhone(employee.getContactInfo() != null ? employee.getContactInfo().getPrimaryPhone() : null)
@@ -455,8 +455,8 @@ Optional<OrganizationChart> existingChart =
 
     private EmployeeInsuranceResponse mapInsuranceToResponse(EmployeeInsurance insurance) {
         return EmployeeInsuranceResponse.builder()
-                .insuranceId(insurance.getInsuranceId())
-                .employeeId(insurance.getEmployee().getEmployeeId())
+                .id(insurance.getId())
+                .employeeId(insurance.getEmployee().getId())
                 .policyNumber(insurance.getPolicyNumber())
                 .insuranceType(insurance.getInsuranceType().toString())
                 .providerName(insurance.getProviderName())

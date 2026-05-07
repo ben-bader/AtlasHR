@@ -17,8 +17,8 @@ import com.hrms.employee.common.enums.EmploymentChangeType;
 public class EmploymentHistory {
 
     @Id
-    @Column(length = 20)
-    private String historyId;
+    @Column(name = "history_id", length = 20)
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)

@@ -16,8 +16,8 @@ import com.hrms.employee.common.enums.DesignationStatus;
 public class Designation {
 
     @Id
-    @Column(length = 20)
-    private String designationId;
+    @Column(name = "designation_id", length = 20)
+    private String id;
 
     @Column(nullable = false, unique = true)
     private String designationName;
