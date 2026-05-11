@@ -1,6 +1,6 @@
 package com.hrms.attendance_service.application.service;
 
-import com.hrms.attendance_service.application.dto.EmployeeResponse;
+import com.hrms.attendance_service.application.dto.BulkAttendanceDTO;
 import com.hrms.attendance_service.application.dto.VerificationPayloadDTO;
 import com.hrms.attendance_service.common.enums.AttendanceStatus;
 import com.hrms.attendance_service.common.enums.VerificationMethod;
@@ -10,7 +10,6 @@ import com.hrms.attendance_service.common.utils.JsonMapperUtil;
 import com.hrms.attendance_service.domain.model.Attendance;
 import com.hrms.attendance_service.domain.model.Shift;
 import com.hrms.attendance_service.domain.repository.AttendanceRepository;
-import com.hrms.attendance_service.infrastructure.client.EmployeeClient;
 import com.hrms.attendance_service.infrastructure.event.AttendanceCheckOutEvent;
 import com.hrms.attendance_service.infrastructure.event.AttendanceCreatedEvent;
 import com.hrms.attendance_service.infrastructure.event.AttendanceDeletedEvent;
@@ -21,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,32 +34,28 @@ public class AttendanceService {
 
     // ================= CHECK IN =================
     public Attendance checkIn(String employeeId,
-                              VerificationMethod method,
-                              VerificationPayloadDTO payload) {
+                            VerificationMethod method,
+                            VerificationPayloadDTO payload) {
 
-        // ================= VALIDATION =================
         verificationEngineService.validate(method, payload);
 
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
 
         Attendance attendance = attendanceRepository
-                .findByEmployeeIdAndDate(employeeId, today);
+                .findByEmployeeIdAndDate(employeeId, today)
+                .orElse(Attendance.builder()
+                        .employeeId(employeeId)
+                        .date(today)
+                        .build());
 
         if (attendance.getCheckIn() != null) {
-            throw new BadRequestException(
-                "Employee already checked in today"
-            );
+            throw new BadRequestException("Employee already checked in today");
         }
 
-        attendance.setEmployeeId(employeeId);
-        attendance.setDate(today);
         attendance.setCheckIn(now);
         attendance.setMethod(method);
-
-        attendance.setVerificationPayload(
-                jsonMapperUtil.toJson(payload)
-        );
+        attendance.setVerificationPayload(jsonMapperUtil.toJson(payload));
 
         Shift shift = attendance.getShift();
 
@@ -71,7 +67,6 @@ public class AttendanceService {
 
         Attendance saved = attendanceRepository.save(attendance);
 
-        // ================= EVENT =================
         publishCreatedEvent(saved);
 
         return saved;
@@ -84,7 +79,8 @@ public class AttendanceService {
         LocalDateTime now = LocalDateTime.now();
 
         Attendance attendance = attendanceRepository
-                .findByEmployeeIdAndDate(employeeId, today);
+        .findByEmployeeIdAndDate(employeeId, today)
+        .orElseThrow(() -> new ResourceNotFoundException("No attendance found"));
 
         if (attendance.getCheckOut() != null) {
             throw new BadRequestException(
@@ -195,6 +191,36 @@ public class AttendanceService {
                 RabbitMQConfig.ATTENDANCE_DELETED,
                 event
         );
+    }
+    //Bulk attendance
+    public List<Attendance> createBulkAttendances(
+            List<BulkAttendanceDTO> dtos
+    ) {
+
+        List<Attendance> list = new ArrayList<>();
+
+        for (BulkAttendanceDTO dto : dtos) {
+
+            if (attendanceRepository
+                    .existsByEmployeeIdAndDateAndDeletedFalse(
+                            dto.getEmployeeId(),
+                            dto.getDate()
+                    )) {
+                continue;
+            }
+
+            Attendance attendance = Attendance.builder()
+                    .employeeId(dto.getEmployeeId())
+                    .date(dto.getDate())
+                    .checkIn(dto.getCheckIn())
+                    .checkOut(dto.getCheckOut())
+                    .status(AttendanceStatus.PRESENT)
+                    .build();
+
+            list.add(attendance);
+        }
+
+        return attendanceRepository.saveAll(list);
     }
 
     // ================= BUSINESS LOGIC =================

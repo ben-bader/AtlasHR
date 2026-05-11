@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: attendance-service-config
+  namespace: hrms
+data:
+  database-url: "jdbc:postgresql://postgres:5432/hrms_attendance_db"
+  rabbitmq-host: "rabbitmq"
+  rabbitmq-port: "5672"

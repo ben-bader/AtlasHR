@@ -21,7 +21,6 @@ public class ShiftRequestDTO {
     @NotNull
     private LocalTime startTime;
 
-    @NotNull
     private LocalTime endTime;
 
     private Integer gracePeriodMinutes;

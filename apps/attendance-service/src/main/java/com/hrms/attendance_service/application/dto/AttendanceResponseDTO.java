@@ -1,6 +1,7 @@
 package com.hrms.attendance_service.application.dto;
 
 import com.hrms.attendance_service.common.enums.AttendanceStatus;
+import com.hrms.attendance_service.common.enums.VerificationMethod;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class AttendanceResponse {
+public class AttendanceResponseDTO {
 
     private Long id;
 
@@ -23,6 +24,12 @@ public class AttendanceResponse {
     private LocalDateTime checkOut;
 
     private AttendanceStatus status;
+
+    private Long shiftId;
+    
+    private String shiftName;
+
+    private VerificationMethod method;
 
     private Double workedHours;
 

@@ -22,7 +22,6 @@ public class Attendance extends BaseEntity {
     private String employeeId;
 
     private String departmentName;
-
     private String designationName;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,7 +31,6 @@ public class Attendance extends BaseEntity {
     private LocalDate date;
 
     private LocalDateTime checkIn;
-
     private LocalDateTime checkOut;
 
     @Enumerated(EnumType.STRING)
@@ -41,39 +39,37 @@ public class Attendance extends BaseEntity {
     private Double workedHours;
 
     private Boolean justified;
-
     private Boolean onLeave;
 
+    @Column(length = 2000)
     private String note;
 
     @Enumerated(EnumType.STRING)
     private VerificationMethod method;
 
-    private String deviceId;
+    
+    @Column(columnDefinition = "TEXT")
+    private String verificationPayload;
 
-    private String qrCodeUsed;
-
-    private String nfcTagUsed;
-
-    private Boolean verifiedByBiometric;
-
-    // ================= COMPUTED =================
+    // ================= COMPUTED (NOT DB FIELDS) =================
+    @Transient
     private Boolean isLate;
+
+    @Transient
     private Integer lateMinutes;
 
+    @Transient
     private Boolean isOvertime;
+
+    @Transient
     private Integer overtimeMinutes;
 
     @PrePersist
     public void prePersist() {
-
         if (this.date == null) this.date = LocalDate.now();
         if (this.status == null) this.status = AttendanceStatus.PRESENT;
         if (this.justified == null) this.justified = false;
         if (this.onLeave == null) this.onLeave = false;
-        if (this.verifiedByBiometric == null) this.verifiedByBiometric = false;
-        if (this.isLate == null) this.isLate = false;
-        if (this.isOvertime == null) this.isOvertime = false;
     }
 
     public boolean isCheckedIn() {

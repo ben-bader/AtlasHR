@@ -4,7 +4,9 @@ import com.hrms.attendance_service.application.dto.*;
 import com.hrms.attendance_service.application.mapper.AttendanceMapper;
 import com.hrms.attendance_service.application.service.AttendanceService;
 import com.hrms.attendance_service.common.api.ApiResponse;
-import com.hrms.attendance_service.common.utils.JsonMapperUtil;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +24,17 @@ public class AttendanceController {
     private final AttendanceMapper attendanceMapper;
 
     // ================= CHECK IN =================
-    @PostMapping("/check-in")
-    public ApiResponse<AttendanceResponseDTO> checkIn(
-            @Valid @RequestBody CheckInRequestDTO request
-    ) {
+        @PreAuthorize("hasRole('EMPLOYEE')")
+        @PostMapping("/check-in")
+        public ApiResponse<AttendanceResponseDTO> checkIn(
+                @Valid @RequestBody CheckInRequestDTO request,
+                Authentication authentication
+        ) {
+
+        String employeeId = authentication.getName();
 
         var attendance = attendanceService.checkIn(
-                request.getEmployeeId(),
+                employeeId,
                 request.getMethod(),
                 request.getVerificationPayload()
         );
@@ -37,51 +43,58 @@ public class AttendanceController {
                 attendanceMapper.toResponse(attendance),
                 "Check-in successful"
         );
-    }
+        }
 
     // ================= CHECK OUT =================
-    @PostMapping("/check-out")
-    public ApiResponse<AttendanceResponseDTO> checkOut(
-            @Valid @RequestBody CheckOutRequestDTO request
-    ) {
+        @PreAuthorize("hasRole('EMPLOYEE')")
+        @PostMapping("/check-out")
+        public ApiResponse<AttendanceResponseDTO> checkOut(
+                Authentication authentication
+        ) {
 
-        var attendance = attendanceService.checkOut(
-                request.getEmployeeId()
-        );
+        String employeeId = authentication.getName();
+
+        var attendance = attendanceService.checkOut(employeeId);
 
         return ApiResponse.success(
                 attendanceMapper.toResponse(attendance),
                 "Check-out successful"
         );
-    }
-
-    // ================= GET BY ID =================
-    @GetMapping("/{id}")
-    public ApiResponse<AttendanceResponseDTO> getById(@PathVariable Long id) {
-
-        var attendance = attendanceService.getById(id);
-
-        return ApiResponse.success(
-                attendanceMapper.toResponse(attendance),
-                "Attendance details"
-        );
-    }
+        }
 
     // ================= GET EMPLOYEE =================
-    @GetMapping("/employee/{employeeId}")
-    public ApiResponse<List<AttendanceResponseDTO>> getEmployeeAttendances(
-            @PathVariable String employeeId
-    ) {
+        @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
+        @GetMapping("/employee/{employeeId}")
+        public ApiResponse<List<AttendanceResponseDTO>> getEmployeeAttendances(
+                @PathVariable String employeeId
+        ) {
+
+                var result = attendanceService.getEmployeeAttendances(employeeId)
+                        .stream()
+                        .map(attendanceMapper::toResponse)
+                        .toList();
+
+                return ApiResponse.success(result, "Employee attendances");
+        }
+
+        @PreAuthorize("hasRole('EMPLOYEE')")
+        @GetMapping("/employee")
+        public ApiResponse<List<AttendanceResponseDTO>> getMyAttendances(
+                Authentication authentication
+        ) {
+
+        String employeeId = authentication.getName();
 
         var result = attendanceService.getEmployeeAttendances(employeeId)
                 .stream()
                 .map(attendanceMapper::toResponse)
                 .toList();
 
-        return ApiResponse.success(result, "Employee attendances");
-    }
+        return ApiResponse.success(result, "My attendances");
+        }
 
     // ================= GET BY DATE =================
+    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
     @GetMapping("/date/{date}")
     public ApiResponse<List<AttendanceResponseDTO>> getByDate(
             @PathVariable String date
@@ -95,19 +108,36 @@ public class AttendanceController {
         return ApiResponse.success(result, "Attendances by date");
     }
 
-    // ================= DELETE (SOFT DELETE) =================
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteAttendance(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
+    // ================= GET BY ID =================
+    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
+    @GetMapping("/{id}")
+    public ApiResponse<AttendanceResponseDTO> getById(@PathVariable Long id) {
 
-        attendanceService.deleteAttendance(id, authentication.getName());
+        var attendance = attendanceService.getById(id);
 
-        return ApiResponse.success(null, "Attendance deleted");
+        return ApiResponse.success(
+                attendanceMapper.toResponse(attendance),
+                "Attendance details"
+        );
     }
 
+    // ================= DELETE (SOFT DELETE) =================
+        @PreAuthorize("hasRole('ADMIN')")
+        @DeleteMapping("/{id}")
+        public ApiResponse<Void> deleteAttendance(
+                @PathVariable Long id,
+                Authentication authentication
+        ) {
+
+        String deletedBy = authentication.getName();
+
+        attendanceService.deleteAttendance(id, deletedBy);
+
+        return ApiResponse.success(null, "Attendance deleted");
+        }
+
     // ================= RESTORE =================
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/restore/{id}")
     public ApiResponse<Void> restoreAttendance(@PathVariable Long id) {
 

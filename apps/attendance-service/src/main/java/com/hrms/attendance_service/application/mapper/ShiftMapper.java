@@ -11,12 +11,4 @@ public interface ShiftMapper {
     ShiftResponseDTO toDto(Shift shift);
 
     Shift toEntity(ShiftRequestDTO dto);
-
-    default Shift fromId(Long id) {
-        if (id == null) return null;
-
-        Shift shift = new Shift();
-        shift.setId(id);
-        return shift;
-    }
 }

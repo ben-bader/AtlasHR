@@ -1,0 +1,137 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: attendance-service
+  namespace: hrms
+  labels:
+    app: attendance-service
+    version: v1
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: attendance-service
+
+  template:
+    metadata:
+      labels:
+        app: attendance-service
+
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+        prometheus.io/path: "/actuator/prometheus"
+
+    spec:
+      serviceAccountName: attendance-service
+
+      containers:
+        - name: attendance-service
+          image: hrms/attendance-service:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 8082
+              protocol: TCP
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: attendance-service-config
+                  key: database-url
+
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: attendance-service-secrets
+                  key: db-username
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: attendance-service-secrets
+                  key: db-password
+
+            - name: SPRING_RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: attendance-service-config
+                  key: rabbitmq-host
+
+            - name: SPRING_RABBITMQ_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: attendance-service-config
+                  key: rabbitmq-port
+
+            - name: SPRING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: attendance-service-secrets
+                  key: rabbitmq-username
+
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: attendance-service-secrets
+                  key: rabbitmq-password
+
+            - name: JAVA_OPTS
+              value: "-Xmx512m -Xms256m"
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+
+      volumes:
+        - name: config
+          configMap:
+            name: attendance-service-config
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - attendance-service
+                topologyKey: kubernetes.io/hostname
+                

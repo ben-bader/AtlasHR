@@ -1,0 +1,45 @@
+replicaCount: 3
+
+image:
+  repository: hrms/attendance-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+config:
+  databaseUrl: "jdbc:postgresql://postgres-prod:5432/hrms_attendance_db"
+  rabbitmqHost: "rabbitmq-prod"
+  rabbitmqPort: "5672"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: attendance-service.hrms.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: attendance-service-tls
+      hosts:
+        - attendance-service.hrms.example.com

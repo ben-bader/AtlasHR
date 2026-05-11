@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hrms.attendance_service.common.enums.AttendanceStatus;
+
 @Entity
 @Table(name = "daily_attendance",
         uniqueConstraints = @UniqueConstraint(columnNames = "date"))
@@ -34,7 +36,7 @@ public class DailyAttendance extends BaseEntity {
     public void calculateStats() {
 
         this.totalPresent = (int) attendances.stream()
-                .filter(a -> a.getStatus().name().equals("PRESENT"))
+                .filter(a -> a.getStatus() == AttendanceStatus.PRESENT)
                 .count();
 
         this.totalLate = (int) attendances.stream()
@@ -42,11 +44,11 @@ public class DailyAttendance extends BaseEntity {
                 .count();
 
         this.totalAbsent = (int) attendances.stream()
-                .filter(a -> a.getStatus().name().equals("ABSENT"))
+                .filter(a -> a.getStatus() == AttendanceStatus.ABSENT)
                 .count();
 
         this.totalOnLeave = (int) attendances.stream()
                 .filter(a -> Boolean.TRUE.equals(a.getOnLeave()))
                 .count();
-    }
+        }
 }

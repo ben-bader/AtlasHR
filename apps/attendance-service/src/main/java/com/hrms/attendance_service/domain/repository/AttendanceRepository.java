@@ -15,11 +15,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByDate(LocalDate date);
 
-    List<Attendance> findByShiftId(Long shiftId);
-
-    List<Attendance> findByEmployeeIdAndDeletedFalse(String employeeId);
-
-    List<Attendance> findByDateAndDeletedFalse(LocalDate date);
-
     Optional<Attendance> findByIdAndDeletedFalse(Long id);
+
+    boolean existsByEmployeeIdAndDateAndDeletedFalse(
+            String employeeId,
+            LocalDate date
+    );
 }

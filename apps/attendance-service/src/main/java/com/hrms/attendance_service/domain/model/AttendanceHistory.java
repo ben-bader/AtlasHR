@@ -18,10 +18,12 @@ import com.hrms.attendance_service.common.enums.VerificationMethod;
 public class AttendanceHistory extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attendance_id")
+    @JoinColumn(name = "attendance_id", nullable = false)
     private Attendance attendance;
 
     private String employeeId;
+
+    private String ipAddress;
 
     private LocalDateTime actionTime;
 

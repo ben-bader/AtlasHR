@@ -1,148 +1,77 @@
 package com.hrms.attendance_service.presentation.controller;
 
-import com.hrms.attendance_service.application.dto.*;
-import com.hrms.attendance_service.application.mapper.AttendanceMapper;
-import com.hrms.attendance_service.application.service.AttendanceService;
+import com.hrms.attendance_service.application.dto.ShiftRequestDTO;
+import com.hrms.attendance_service.application.dto.ShiftResponseDTO;
+import com.hrms.attendance_service.application.mapper.ShiftMapper;
+import com.hrms.attendance_service.application.service.ShiftService;
 import com.hrms.attendance_service.common.api.ApiResponse;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import com.hrms.attendance_service.domain.model.Shift;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/attendances")
+@RequestMapping("/api/shifts")
 @RequiredArgsConstructor
-public class AttendanceController {
+public class ShiftController {
 
-    private final AttendanceService attendanceService;
-    private final AttendanceMapper attendanceMapper;
+    private final ShiftService shiftService;
+    private final ShiftMapper shiftMapper;
 
-    // ================= CHECK IN =================
-        @PreAuthorize("hasRole('EMPLOYEE')")
-        @PostMapping("/check-in")
-        public ApiResponse<AttendanceResponseDTO> checkIn(
-                @Valid @RequestBody CheckInRequestDTO request,
-                Authentication authentication
-        ) {
-
-        String employeeId = (String) authentication.getDetails();
-
-        var attendance = attendanceService.checkIn(
-                employeeId,
-                request.getMethod(),
-                request.getVerificationPayload()
-        );
-
-        return ApiResponse.success(
-                attendanceMapper.toResponse(attendance),
-                "Check-in successful"
-        );
-        }
-
-    // ================= CHECK OUT =================
-        @PreAuthorize("hasRole('EMPLOYEE')")
-        @PostMapping("/check-out")
-        public ApiResponse<AttendanceResponseDTO> checkOut(
-                Authentication authentication
-        ) {
-
-        String employeeId = (String) authentication.getDetails();
-
-        var attendance = attendanceService.checkOut(employeeId);
-
-        return ApiResponse.success(
-                attendanceMapper.toResponse(attendance),
-                "Check-out successful"
-        );
-        }
-
-    // ================= GET EMPLOYEE =================
-        @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-        @GetMapping("/employee/{employeeId}")
-        public ApiResponse<List<AttendanceResponseDTO>> getEmployeeAttendances(
-                @PathVariable String employeeId
-        ) {
-
-                var result = attendanceService.getEmployeeAttendances(employeeId)
-                        .stream()
-                        .map(attendanceMapper::toResponse)
-                        .toList();
-
-                return ApiResponse.success(result, "Employee attendances");
-        }
-
-        @PreAuthorize("hasRole('EMPLOYEE')")
-        @GetMapping("/employee")
-        public ApiResponse<List<AttendanceResponseDTO>> getMyAttendances(
-                Authentication authentication
-        ) {
-
-        String employeeId = (String) authentication.getDetails();
-
-        var result = attendanceService.getEmployeeAttendances(employeeId)
-                .stream()
-                .map(attendanceMapper::toResponse)
-                .toList();
-
-        return ApiResponse.success(result, "My attendances");
-        }
-
-    // ================= GET BY DATE =================
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @GetMapping("/date/{date}")
-    public ApiResponse<List<AttendanceResponseDTO>> getByDate(
-            @PathVariable String date
+    // ================= CREATE SHIFT =================
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping
+    public ApiResponse<ShiftResponseDTO> createShift(
+            @Valid @RequestBody ShiftRequestDTO request
     ) {
 
-        var result = attendanceService.getAttendancesByDate(date)
+        Shift shift = shiftMapper.toEntity(request);
+        Shift saved = shiftService.createShift(shift);
+
+        return ApiResponse.success(
+                shiftMapper.toDto(saved),
+                "Shift created successfully"
+        );
+    }
+
+    // ================= GET ALL ACTIVE =================
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @GetMapping
+    public ApiResponse<List<ShiftResponseDTO>> getAllActive() {
+
+        List<ShiftResponseDTO> result = shiftService.getAllActiveShifts()
                 .stream()
-                .map(attendanceMapper::toResponse)
+                .map(shiftMapper::toDto)
                 .toList();
 
-        return ApiResponse.success(result, "Attendances by date");
+        return ApiResponse.success(result, "Active shifts");
     }
 
     // ================= GET BY ID =================
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
-    @GetMapping("/{id}")
-    public ApiResponse<AttendanceResponseDTO> getById(@PathVariable Long id) {
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @GetMapping("/{id}")
+        public ApiResponse<ShiftResponseDTO> getById(@PathVariable Long id) {
 
-        var attendance = attendanceService.getById(id);
+                Shift shift = shiftService.getById(id);
 
-        return ApiResponse.success(
-                attendanceMapper.toResponse(attendance),
-                "Attendance details"
-        );
-    }
-
-    // ================= DELETE (SOFT DELETE) =================
-        @PreAuthorize("hasRole('ADMIN')")
-        @DeleteMapping("/{id}")
-        public ApiResponse<Void> deleteAttendance(
-                @PathVariable Long id,
-                Authentication authentication
-        ) {
-
-        String deletedBy = authentication.getName();
-
-        attendanceService.deleteAttendance(id, deletedBy);
-
-        return ApiResponse.success(null, "Attendance deleted");
+                return ApiResponse.success(
+                        shiftMapper.toDto(shift),
+                        "Shift details"
+                );
         }
 
-    // ================= RESTORE =================
+    // ================= DELETE SHIFT =================
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/restore/{id}")
-    public ApiResponse<Void> restoreAttendance(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteShift(@PathVariable Long id) {
 
-        attendanceService.restoreAttendance(id);
+        shiftService.deleteShift(id);
 
-        return ApiResponse.success(null, "Attendance restored");
+        return ApiResponse.success(null, "Shift deleted (soft delete)");
     }
 }

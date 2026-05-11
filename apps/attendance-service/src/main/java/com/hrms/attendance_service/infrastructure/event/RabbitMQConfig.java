@@ -39,3 +39,4 @@ public class RabbitMQConfig {
                 .to(exchange)
                 .with(ATTENDANCE_CHECKOUT);
     }
+}

@@ -54,7 +54,15 @@ public class ShiftPlanning extends BaseEntity {
     }
 
     public boolean isInRange(LocalDate date) {
-        return (date.isEqual(startDate) || date.isAfter(startDate)) &&
-               (date.isEqual(endDate) || date.isBefore(endDate));
+
+        boolean afterStart =
+                date.isEqual(startDate) || date.isAfter(startDate);
+
+        boolean beforeEnd =
+                endDate == null ||
+                date.isEqual(endDate) ||
+                date.isBefore(endDate);
+
+        return afterStart && beforeEnd;
     }
 }

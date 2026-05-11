@@ -1,0 +1,25 @@
+replicaCount: 2
+
+image:
+  repository: hrms/attendance-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 75
+
+config:
+  databaseUrl: "jdbc:postgresql://postgres-staging:5432/hrms_attendance_db"
+  rabbitmqHost: "rabbitmq-staging"
+  rabbitmqPort: "5672"

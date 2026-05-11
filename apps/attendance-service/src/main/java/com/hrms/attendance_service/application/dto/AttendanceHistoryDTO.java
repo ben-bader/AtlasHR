@@ -2,6 +2,7 @@ package com.hrms.attendance_service.application.dto;
 
 import com.hrms.attendance_service.common.enums.AttendanceAction;
 import com.hrms.attendance_service.common.enums.VerificationMethod;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -25,5 +26,13 @@ public class AttendanceHistoryDTO {
 
     private String description;
 
+    private String oldValue;
+
+    private String newValue;
+
     private String performedBy;
+
+    private String deviceInfo;
+
+    private String ipAddress;
 }
