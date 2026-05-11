@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.hrms</groupId>
+	<artifactId>hrms-monorepo</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>HRMS monorepo</name>
+	<description>Aggregator-only parent for IDE and bulk Maven builds; services keep their own spring-boot-parent.</description>
+
+	<modules>
+		<module>apps/gateway-service</module>
+		<module>apps/auth-service</module>
+		<module>apps/employee-service</module>
+	</modules>
+</project>

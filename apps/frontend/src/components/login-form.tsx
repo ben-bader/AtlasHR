@@ -54,7 +54,7 @@ export function LoginForm({
   return (
     <form 
       onSubmit={handleSubmit(onSubmit)} 
-      className={cn("flex flex-col gap-6", className)} 
+      className={cn("flex flex-col gap-2", className)} 
       {...props}
     >
       <FieldGroup>
@@ -133,7 +133,7 @@ export function LoginForm({
           </Button>
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <a href="#" className="underline underline-offset-4">
+            <a href="/register" className="underline underline-offset-4">
               Sign up
             </a>
           </FieldDescription>

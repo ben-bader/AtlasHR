@@ -10,6 +10,7 @@ import {
   CreateEmployeeRequest,
   UpdateEmployeeRequest,
   EmployeeSearchParams,
+  TerminateEmployeeRequest,
 } from "@/lib/types"
 
 export function useEmployeeList(params?: EmployeeSearchParams) {
@@ -114,25 +115,26 @@ export function useUpdateEmployee(id: string) {
   }
 }
 
-export function useDeleteEmployee() {
+export function useTerminateEmployee() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: (id: string) => employeeAPI.deleteEmployee(id),
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (body: TerminateEmployeeRequest) =>
+      employeeAPI.terminateEmployee(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] })
       setError(null)
     },
     onError: (err: Error) => {
       const errorMessage =
-        err?.message || "Failed to delete employee"
+        err?.message || "Failed to terminate employee"
       setError(errorMessage)
     },
   })
 
   return {
-    deleteEmployee: mutate,
+    terminateEmployee: mutateAsync,
     isLoading: isPending,
     error,
     setError,

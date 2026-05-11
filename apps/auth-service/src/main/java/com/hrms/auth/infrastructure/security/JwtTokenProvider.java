@@ -5,12 +5,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.hrms.auth.domain.model.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -22,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret:mySecretKeyForJWTTokenGenerationAndValidationPurposesOnlyUseInProductionWithEnvironmentVariable}")
+    @Value("${}")
     private String jwtSecret;
 
     @Value("${jwt.expiration:86400000}")
@@ -35,13 +39,27 @@ public class JwtTokenProvider {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UserDetails userDetails) {
+    private Map<String, Object> buildClaims(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof User user) {
+            claims.put("userId", user.getId().toString());
+            claims.put("username", user.getUsername());
+            claims.put(
+                    "roles",
+                    user.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList()));
+        }
+        return claims;
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = buildClaims(userDetails);
         return createToken(claims, userDetails.getUsername(), jwtExpirationMs);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
+        Map<String, Object> claims = buildClaims(userDetails);
         return createToken(claims, userDetails.getUsername(), refreshTokenExpirationMs);
     }
 

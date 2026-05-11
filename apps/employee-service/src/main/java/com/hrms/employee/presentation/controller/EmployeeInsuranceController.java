@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/employees/insurances")
+@RequestMapping("/api/v1/employees/insurances")
 @Slf4j
 public class EmployeeInsuranceController {
 

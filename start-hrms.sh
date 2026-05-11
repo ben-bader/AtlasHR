@@ -48,7 +48,7 @@
   SERVICES=(
     [auth-service]="$SCRIPT_DIR/apps/auth-service/docker-compose.yml"
     [employee-service]="$SCRIPT_DIR/apps/employee-service/docker-compose.yml"
-    [api-gateway]="$SCRIPT_DIR/gateway/docker-compose.yml"
+    [api-gateway]="$SCRIPT_DIR/apps/gateway-service/docker-compose.yml"
     [frontend]="$SCRIPT_DIR/apps/frontend/docker-compose.yml"
   )
 
@@ -253,7 +253,7 @@
 
   echo -e "\n${BOLD}Access points:${NC}"
   echo -e "  Frontend         ->  http://localhost:3000"
-  echo -e "  API Gateway      ->  http://localhost:3001/api"
+  echo -e "  API Gateway      ->  http://localhost:8080/api"
   echo -e "  Auth Service     ->  http://localhost:8081/actuator/health"
   echo -e "  Employee Service ->  http://localhost:8083/actuator/health"
   echo -e "  RabbitMQ UI      ->  http://localhost:15672  (hrms / hrms_pass)"

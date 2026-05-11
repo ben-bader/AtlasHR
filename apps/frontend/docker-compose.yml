@@ -4,20 +4,20 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: http://hrms-api-gateway:3000/api
+        NEXT_PUBLIC_API_URL: http://localhost:8084/api
         NEXT_PUBLIC_APP_NAME: HRMS
 
     container_name: hrms-frontend
 
     environment:
       NODE_ENV: production
-      PORT: 3001
+      PORT: 3000
 
       # IMPORTANT: runtime only (server-side usage)
-      API_GATEWAY_INTERNAL_URL: http://hrms-api-gateway:3000
+      API_GATEWAY_INTERNAL_URL: http://hrms-gateway-service:8084
 
     ports:
-      - "3001:3001"
+      - "3000:3000"
 
 
     networks:

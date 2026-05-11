@@ -23,8 +23,9 @@ export const employeeCreateSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().optional(),
-  department: z.string().optional(),
-  designation: z.string().optional(),
+  departmentId: z.string().optional(),
+  designationId: z.string().optional(),
+  reportingManagerId: z.string().optional(),
   joinDate: z.string().optional(),
   dateOfBirth: z.string().optional(),
   address: z.string().optional(),
@@ -32,10 +33,6 @@ export const employeeCreateSchema = z.object({
   state: z.string().optional(),
   zipCode: z.string().optional(),
   country: z.string().optional(),
-  employmentType: z.string().optional(),
-  status: z.string().optional(),
-  manager: z.string().optional(),
-  salary: z.number().optional(),
 });
 
 export type EmployeeCreateFormValues = z.infer<typeof employeeCreateSchema>;

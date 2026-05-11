@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import { Users, BarChart3, Settings } from "lucide-react"
+import { Users, BarChart3, Settings, Building2, BadgeCheck, Network, Award, Shield } from "lucide-react"
 
 export default function DashboardPage() {
   useProtectedRoute()
@@ -106,22 +106,69 @@ export default function DashboardPage() {
             </div>
           </div>
           
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min p-6">
-            <h2 className="text-2xl font-bold mb-4">Welcome to AtlasHR</h2>
-            <p className="text-muted-foreground mb-6">
-              Manage your HR operations efficiently with our comprehensive employee management system. 
-              Track employees, manage information, and streamline your HR workflows all in one place.
-            </p>
-            <div className="space-y-4">
-              <div className="p-4 border border-border rounded-lg">
-                <h3 className="font-semibold mb-2">Getting Started</h3>
-                <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                  <li>Add new employees to the system</li>
-                  <li>View and update employee information</li>
-                  <li>Search and filter employees by various criteria</li>
-                  <li>Manage employee lifecycle from onboarding to offboarding</li>
-                </ul>
-              </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Welcome to AtlasHR</h2>
+              <p className="text-muted-foreground text-sm">
+                Employee service modules available through the API gateway (authenticated).
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/departments")}
+                className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 text-left hover:bg-muted/60 transition-colors"
+              >
+                <Building2 className="h-8 w-8 text-blue-600 shrink-0" />
+                <div>
+                  <p className="font-medium">Departments</p>
+                  <p className="text-xs text-muted-foreground">CRUD · sub-departments</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/designations")}
+                className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 text-left hover:bg-muted/60 transition-colors"
+              >
+                <BadgeCheck className="h-8 w-8 text-violet-600 shrink-0" />
+                <div>
+                  <p className="font-medium">Designations</p>
+                  <p className="text-xs text-muted-foreground">Job titles & levels</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/organization")}
+                className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 text-left hover:bg-muted/60 transition-colors"
+              >
+                <Network className="h-8 w-8 text-emerald-600 shrink-0" />
+                <div>
+                  <p className="font-medium">Org chart</p>
+                  <p className="text-xs text-muted-foreground">Manager · dept · employee</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/skills")}
+                className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 text-left hover:bg-muted/60 transition-colors"
+              >
+                <Award className="h-8 w-8 text-amber-600 shrink-0" />
+                <div>
+                  <p className="font-medium">Skills</p>
+                  <p className="text-xs text-muted-foreground">Search · add skills</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/insurance")}
+                className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 text-left hover:bg-muted/60 transition-colors"
+              >
+                <Shield className="h-8 w-8 text-sky-600 shrink-0" />
+                <div>
+                  <p className="font-medium">Insurance</p>
+                  <p className="text-xs text-muted-foreground">Policies per employee</p>
+                </div>
+              </button>
             </div>
           </div>
         </div>

@@ -3,7 +3,6 @@
 import * as React from "react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -13,103 +12,62 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon, Users } from "lucide-react"
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  Award,
+  Shield,
+  GalleryVerticalEnd,
+} from "lucide-react"
 
-// This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "User",
+    email: "user@atlashr.local",
+    avatar: "/placeholder.svg",
   },
   teams: [
     {
-      name: "Acme Inc",
-      logo: (
-        <GalleryVerticalEndIcon
-        />
-      ),
+      name: "AtlasHR",
+      logo: <GalleryVerticalEnd className="size-4" />,
       plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: (
-        <AudioLinesIcon
-        />
-      ),
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: (
-        <TerminalIcon
-        />
-      ),
-      plan: "Free",
     },
   ],
   navMain: [
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: <PieChartIcon />,
-      isActive: true,
+      icon: <LayoutDashboard className="size-4" />,
     },
     {
       title: "Employees",
       url: "/dashboard/employees",
-      icon: <Users />,
+      icon: <Users className="size-4" />,
       items: [
-        {
-          title: "View All",
-          url: "/dashboard/employees",
-        },
-        {
-          title: "Add New",
-          url: "/dashboard/employees/create",
-        },
+        { title: "Directory", url: "/dashboard/employees" },
+        { title: "Onboard", url: "/dashboard/employees/create" },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: <Settings2Icon />,
+      title: "Organization",
+      url: "/dashboard/departments",
+      icon: <Building2 className="size-4" />,
       items: [
-        {
-          title: "Profile",
-          url: "#",
-        },
-        {
-          title: "Account",
-          url: "#",
-        },
+        { title: "Departments", url: "/dashboard/departments" },
+        { title: "Designations", url: "/dashboard/designations" },
+        { title: "Org chart", url: "/dashboard/organization" },
       ],
     },
-  ],
-  projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: (
-        <FrameIcon
-        />
-      ),
+      title: "Skills",
+      url: "/dashboard/skills",
+      icon: <Award className="size-4" />,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: (
-        <PieChartIcon
-        />
-      ),
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: (
-        <MapIcon
-        />
-      ),
+      title: "Insurance",
+      url: "/dashboard/insurance",
+      icon: <Shield className="size-4" />,
     },
   ],
 }
@@ -122,7 +80,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
