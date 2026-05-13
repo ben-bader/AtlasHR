@@ -24,7 +24,10 @@ public class ShiftPlanningController {
     private final ShiftPlanningService service;
     private final ShiftPlanningMapper mapper;
 
-    // ================= ASSIGN =================
+    // =====================================================
+    // ASSIGN SHIFT
+    // =====================================================
+
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @PostMapping
     public ApiResponse<ShiftPlanningResponseDTO> assign(
@@ -41,11 +44,13 @@ public class ShiftPlanningController {
         );
     }
 
-    // ================= EMPLOYEE =================
+    // =====================================================
+    // EMPLOYEE FULL PLANNING
+    // =====================================================
+
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/employee/{employeeId}")
-    public ApiResponse<List<ShiftPlanningResponseDTO>>
-    getEmployeePlanning(
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getEmployeePlanning(
             @PathVariable String employeeId
     ) {
 
@@ -60,11 +65,13 @@ public class ShiftPlanningController {
         );
     }
 
-    // ================= MY ACTIVE =================
+    // =====================================================
+    // MY ACTIVE PLANNING
+    // =====================================================
+
     @PreAuthorize("hasRole('EMPLOYEE')")
     @GetMapping("/employee/active")
-    public ApiResponse<ShiftPlanningResponseDTO>
-    getMyActivePlanning(
+    public ApiResponse<ShiftPlanningResponseDTO> getMyActivePlanning(
             Authentication authentication
     ) {
 
@@ -78,11 +85,33 @@ public class ShiftPlanningController {
         );
     }
 
-    // ================= STATUS =================
+    // =====================================================
+    // LATEST PLANNING 
+    // =====================================================
+
+    @PreAuthorize("hasAnyRole('EMPLOYEE','HR','ADMIN')")
+    @GetMapping("/employee/latest")
+    public ApiResponse<ShiftPlanningResponseDTO> getLatest(
+            Authentication authentication
+    ) {
+
+        String employeeId = authentication.getName();
+
+        return ApiResponse.success(
+                mapper.toDto(
+                        service.getLatestPlanning(employeeId)
+                ),
+                "Latest planning"
+        );
+    }
+
+    // =====================================================
+    // STATUS FILTER
+    // =====================================================
+
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/status/{status}")
-    public ApiResponse<List<ShiftPlanningResponseDTO>>
-    getByStatus(
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getByStatus(
             @PathVariable PlanningStatus status
     ) {
 
@@ -97,47 +126,34 @@ public class ShiftPlanningController {
         );
     }
 
-    // ================= SHIFT =================
+    // =====================================================
+    // TEAM ROSTER
+    // =====================================================
+
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/shift/{shiftId}")
-    public ApiResponse<List<ShiftPlanningResponseDTO>>
-    getByShift(
-            @PathVariable Long shiftId
+    @GetMapping("/team/{teamName}")
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getByTeam(
+            @PathVariable String teamName
     ) {
 
-        var result = service.getByShift(shiftId)
+        var result = service.getTeamPlanning(teamName)
                 .stream()
                 .map(mapper::toDto)
                 .toList();
 
         return ApiResponse.success(
                 result,
-                "Shift planning"
+                "Team planning"
         );
     }
 
-    // ================= ACTIVE TODAY =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/active-today")
-    public ApiResponse<List<ShiftPlanningResponseDTO>>
-    getActiveToday() {
+    // =====================================================
+    // DEPARTMENT ROSTER
+    // =====================================================
 
-        var result = service.getActiveToday()
-                .stream()
-                .map(mapper::toDto)
-                .toList();
-
-        return ApiResponse.success(
-                result,
-                "Active planning today"
-        );
-    }
-
-    // ================= DEPARTMENT =================
     @PreAuthorize("hasAnyRole('ADMIN','HR')")
     @GetMapping("/department/{departmentName}")
-    public ApiResponse<List<ShiftPlanningResponseDTO>>
-    getDepartmentPlanning(
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getDepartment(
             @PathVariable String departmentName
     ) {
 
@@ -152,44 +168,111 @@ public class ShiftPlanningController {
         );
     }
 
-    // ================= DELETE =================
+    // =====================================================
+    // DATE RANGE (ROSTER CALENDAR)
+    // =====================================================
+
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @GetMapping("/range")
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getByDateRange(
+            @RequestParam String start,
+            @RequestParam String end
+    ) {
+
+        var result = service.getByDateRange(
+                        java.time.LocalDate.parse(start),
+                        java.time.LocalDate.parse(end)
+                )
+                .stream()
+                .map(mapper::toDto)
+                .toList();
+
+        return ApiResponse.success(
+                result,
+                "Planning by date range"
+        );
+    }
+
+    // =====================================================
+    // TODAY ROSTER
+    // =====================================================
+
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @GetMapping("/today")
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getTodayRoster() {
+
+        var result = service.getTodayRoster()
+                .stream()
+                .map(mapper::toDto)
+                .toList();
+
+        return ApiResponse.success(
+                result,
+                "Today's roster"
+        );
+    }
+
+    // =====================================================
+    // FLEXIBLE SHIFTS
+    // =====================================================
+
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @GetMapping("/flexible")
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getFlexible() {
+
+        var result = service.getFlexibleShifts()
+                .stream()
+                .map(mapper::toDto)
+                .toList();
+
+        return ApiResponse.success(
+                result,
+                "Flexible shifts"
+        );
+    }
+
+    // =====================================================
+    // AUTO GENERATED
+    // =====================================================
+
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @GetMapping("/auto-generated")
+    public ApiResponse<List<ShiftPlanningResponseDTO>> getAutoGenerated() {
+
+        var result = service.getAutoGenerated()
+                .stream()
+                .map(mapper::toDto)
+                .toList();
+
+        return ApiResponse.success(
+                result,
+                "Auto generated planning"
+        );
+    }
+
+    // =====================================================
+    // DELETE
+    // =====================================================
+
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deletePlanning(
-            @PathVariable Long id
-    ) {
+    public ApiResponse<Void> delete(@PathVariable Long id) {
 
-        service.deletePlanning(id);
+        service.delete(id);
 
-        return ApiResponse.success(
-                null,
-                "Planning deleted"
-        );
+        return ApiResponse.success(null, "Planning deleted");
     }
 
-    // ================= RESTORE =================
+    // =====================================================
+    // RESTORE
+    // =====================================================
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/restore/{id}")
-    public ApiResponse<Void> restorePlanning(
-            @PathVariable Long id
-    ) {
+    public ApiResponse<Void> restore(@PathVariable Long id) {
 
-        service.restorePlanning(id);
+        service.restore(id);
 
-        return ApiResponse.success(
-                null,
-                "Planning restored"
-        );
-    }
-
-    // ================= COUNT ACTIVE =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/count/active")
-    public ApiResponse<Long> countActivePlanning() {
-
-        return ApiResponse.success(
-                service.countActivePlanning(),
-                "Active planning count"
-        );
+        return ApiResponse.success(null, "Planning restored");
     }
 }

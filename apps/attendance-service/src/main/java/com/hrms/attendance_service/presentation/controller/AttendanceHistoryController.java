@@ -21,131 +21,111 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AttendanceHistoryController {
 
-    private final AttendanceHistoryService service;
-    private final AttendanceHistoryMapper mapper;
+        private final AttendanceHistoryService service;
+        private final AttendanceHistoryMapper mapper;
 
-    // ================= EMPLOYEE =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/employee/{employeeId}")
-    public ApiResponse<Page<AttendanceHistoryDTO>>
-    getEmployeeHistory(
-            @PathVariable String employeeId,
-            Pageable pageable
-    ) {
+        // ================= EMPLOYEE =================
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @GetMapping("/employee/{employeeId}")
+        public ApiResponse<Page<AttendanceHistoryDTO>> getEmployeeHistory(
+                        @PathVariable String employeeId,
+                        Pageable pageable) {
 
-        Page<AttendanceHistoryDTO> result =
-                service.getEmployeeHistory(
+                Page<AttendanceHistoryDTO> result = service.getEmployeeHistory(
                                 employeeId,
-                                pageable
-                        )
-                        .map(mapper::toDto);
+                                pageable)
+                                .map(mapper::toDto);
 
-        return ApiResponse.success(
-                result,
-                "Employee history"
-        );
-    }
+                return ApiResponse.success(
+                                result,
+                                "Employee history");
+        }
 
-    // ================= ATTENDANCE =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/attendance/{attendanceId}")
-    public ApiResponse<List<AttendanceHistoryDTO>>
-    getAttendanceHistory(
-            @PathVariable Long attendanceId
-    ) {
+        // ================= ATTENDANCE =================
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @GetMapping("/attendance/{attendanceId}")
+        public ApiResponse<List<AttendanceHistoryDTO>> getAttendanceHistory(
+                        @PathVariable Long attendanceId) {
 
-        var result = service.getAttendanceHistory(attendanceId)
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+                var result = service.getAttendanceHistory(attendanceId)
+                                .stream()
+                                .map(mapper::toDto)
+                                .toList();
 
-        return ApiResponse.success(
-                result,
-                "Attendance history"
-        );
-    }
+                return ApiResponse.success(
+                                result,
+                                "Attendance history");
+        }
 
-    // ================= ACTION =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/action/{action}")
-    public ApiResponse<List<AttendanceHistoryDTO>>
-    getByAction(
-            @PathVariable AttendanceAction action
-    ) {
+        // ================= ACTION =================
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @GetMapping("/action/{action}")
+        public ApiResponse<List<AttendanceHistoryDTO>> getByAction(
+                        @PathVariable AttendanceAction action) {
 
-        var result = service.getByAction(action)
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+                var result = service.getByAction(action)
+                                .stream()
+                                .map(mapper::toDto)
+                                .toList();
 
-        return ApiResponse.success(
-                result,
-                "History by action"
-        );
-    }
+                return ApiResponse.success(
+                                result,
+                                "History by action");
+        }
 
-    // ================= RANGE =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/range")
-    public ApiResponse<List<AttendanceHistoryDTO>>
-    getRange(
-            @RequestParam LocalDateTime start,
-            @RequestParam LocalDateTime end
-    ) {
+        // ================= RANGE =================
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @GetMapping("/range")
+        public ApiResponse<List<AttendanceHistoryDTO>> getRange(
+                        @RequestParam LocalDateTime start,
+                        @RequestParam LocalDateTime end) {
 
-        var result = service.getRange(start, end)
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+                var result = service.getRange(start, end)
+                                .stream()
+                                .map(mapper::toDto)
+                                .toList();
 
-        return ApiResponse.success(
-                result,
-                "History range"
-        );
-    }
+                return ApiResponse.success(
+                                result,
+                                "History range");
+        }
 
-    // ================= USER =================
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/performed-by/{performedBy}")
-    public ApiResponse<List<AttendanceHistoryDTO>>
-    getByPerformedBy(
-            @PathVariable String performedBy
-    ) {
+        // ================= USER =================
+        @PreAuthorize("hasRole('ADMIN')")
+        @GetMapping("/performed-by/{performedBy}")
+        public ApiResponse<List<AttendanceHistoryDTO>> getByPerformedBy(
+                        @PathVariable String performedBy) {
 
-        var result = service.getByPerformedBy(performedBy)
-                .stream()
-                .map(mapper::toDto)
-                .toList();
+                var result = service.getByPerformedBy(performedBy)
+                                .stream()
+                                .map(mapper::toDto)
+                                .toList();
 
-        return ApiResponse.success(
-                result,
-                "History by performer"
-        );
-    }
+                return ApiResponse.success(
+                                result,
+                                "History by performer");
+        }
 
-    // ================= DELETE =================
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(
-            @PathVariable Long id
-    ) {
+        // ================= DELETE =================
+        @PreAuthorize("hasRole('ADMIN')")
+        @DeleteMapping("/{id}")
+        public ApiResponse<Void> delete(
+                        @PathVariable Long id) {
 
-        service.delete(id);
+                service.delete(id);
 
-        return ApiResponse.success(
-                null,
-                "History deleted"
-        );
-    }
+                return ApiResponse.success(
+                                null,
+                                "History deleted");
+        }
 
-    // ================= COUNT =================
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
-    @GetMapping("/count")
-    public ApiResponse<Long> count() {
+        // ================= COUNT =================
+        @PreAuthorize("hasAnyRole('ADMIN','HR')")
+        @GetMapping("/count")
+        public ApiResponse<Long> count() {
 
-        return ApiResponse.success(
-                service.count(),
-                "Total history count"
-        );
-    }
+                return ApiResponse.success(
+                                service.count(),
+                                "Total history count");
+        }
 }

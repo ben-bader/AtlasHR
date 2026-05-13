@@ -7,9 +7,7 @@ import com.hrms.attendance_service.domain.model.ShiftPlanning;
 import com.hrms.attendance_service.domain.repository.ShiftPlanningRepository;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,37 +17,66 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ShiftPlanningService {
 
-    private final ShiftPlanningRepository planningRepository;
+    private final ShiftPlanningRepository repository;
 
-    // ================= CREATE =================
+    // =====================================================
+    // CREATE / ASSIGN SHIFT (ROSTER ASSIGNMENT)
+    // =====================================================
+
     public ShiftPlanning assignShift(ShiftPlanning planning) {
 
-        boolean exists = planningRepository
-                .existsByEmployeeIdAndStartDateAndDeletedFalse(
+        // conflict check
+        boolean exists = repository
+                .existsByEmployeeIdAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndDeletedFalse(
                         planning.getEmployeeId(),
+                        planning.getEndDate(),
                         planning.getStartDate()
                 );
 
         if (exists) {
             throw new BadRequestException(
-                    "Planning already exists for this employee and start date"
+                    "Employee already has a shift in this period"
             );
         }
 
-        return planningRepository.save(planning);
+        return repository.save(planning);
     }
 
-    // ================= GET EMPLOYEE =================
+    // =====================================================
+    // EMPLOYEE PLANNING (FULL HISTORY)
+    // =====================================================
+
     public List<ShiftPlanning> getEmployeePlanning(String employeeId) {
 
-        return planningRepository
-                .findByEmployeeIdAndDeletedFalse(employeeId);
+        return repository.findByEmployeeIdAndDeletedFalse(employeeId);
     }
 
-    // ================= GET ACTIVE =================
+    // pagination
+    public Page<ShiftPlanning> getEmployeePlanningPaginated(
+            String employeeId,
+            int page,
+            int size
+    ) {
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("startDate").descending()
+        );
+
+        return repository.findByEmployeeIdAndDeletedFalse(
+                employeeId,
+                pageable
+        );
+    }
+
+    // =====================================================
+    // ACTIVE PLANNING (CURRENT SHIFT)
+    // =====================================================
+
     public ShiftPlanning getActivePlanning(String employeeId) {
 
-        return planningRepository
+        return repository
                 .findTopByEmployeeIdAndEndDateIsNullAndDeletedFalse(employeeId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
@@ -58,90 +85,118 @@ public class ShiftPlanningService {
                 );
     }
 
-    // ================= GET BY STATUS =================
-    public List<ShiftPlanning> getByStatus(PlanningStatus status) {
+    // =====================================================
+    // LATEST PLANNING (ROSTER UI)
+    // =====================================================
 
-        return planningRepository
-                .findByStatusAndDeletedFalse(status);
-    }
+    public ShiftPlanning getLatestPlanning(String employeeId) {
 
-    // ================= GET BY SHIFT =================
-    public List<ShiftPlanning> getByShift(Long shiftId) {
-
-        return planningRepository
-                .findByShiftIdAndDeletedFalse(shiftId);
-    }
-
-    // ================= GET ACTIVE TODAY =================
-    public List<ShiftPlanning> getActiveToday() {
-
-        LocalDate today = LocalDate.now();
-
-        return planningRepository
-                .findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusAndDeletedFalse(
-                        today,
-                        today,
-                        PlanningStatus.ACTIVE
+        return repository
+                .findTopByEmployeeIdAndDeletedFalseOrderByStartDateDesc(employeeId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "No planning found"
+                        )
                 );
     }
 
-    // ================= GET DEPARTMENT =================
-    public List<ShiftPlanning> getDepartmentPlanning(
-            String departmentName
-    ) {
+    // =====================================================
+    // TEAM ROSTER
+    // =====================================================
 
-        return planningRepository
-                .findByDepartmentNameAndDeletedFalse(departmentName);
+    public List<ShiftPlanning> getTeamPlanning(String teamName) {
+
+        return repository.findByTeamNameAndDeletedFalse(teamName);
     }
 
-    // ================= DELETE =================
-    public void deletePlanning(Long id) {
+    // =====================================================
+    // DEPARTMENT ROSTER
+    // =====================================================
 
-        ShiftPlanning planning = planningRepository.findById(id)
+    public List<ShiftPlanning> getDepartmentPlanning(String department) {
+
+        return repository.findByDepartmentNameAndDeletedFalse(department);
+    }
+
+    // =====================================================
+    // STATUS FILTER
+    // =====================================================
+
+    public List<ShiftPlanning> getByStatus(PlanningStatus status) {
+
+        return repository.findByStatusAndDeletedFalse(status);
+    }
+
+    public long countByStatus(PlanningStatus status) {
+
+        return repository.countByStatusAndDeletedFalse(status);
+    }
+
+    // DATE RANGE (ROSTER CALENDAR VIEW)
+    // =====================================================
+
+    public List<ShiftPlanning> getByDateRange(LocalDate start, LocalDate end) {
+
+        return repository.findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndDeletedFalse(start,end);
+
+    }
+
+    // TODAY ROSTER
+    // =====================================================
+
+    public List<ShiftPlanning> getTodayRoster() {
+
+        LocalDate today = LocalDate.now();
+
+        return repository.findByStartDateLessThanEqualAndEndDateGreaterThanEqualAndDeletedFalse(
+                today,
+                today
+        );
+    }
+
+    // FLEXIBLE SHIFTS
+    // =====================================================
+
+    public List<ShiftPlanning> getFlexibleShifts() {
+
+        return repository.findByFlexibleShiftTrueAndDeletedFalse();
+    }
+
+    // AUTO GENERATED ROSTER
+    // =====================================================
+
+    public List<ShiftPlanning> getAutoGenerated() {
+
+        return repository.findByAutoGeneratedTrueAndDeletedFalse();
+    }
+
+    // DELETE
+    // =====================================================
+
+    public void delete(Long id) {
+
+        ShiftPlanning planning = repository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Planning not found"
-                        )
+                        new ResourceNotFoundException("Planning not found")
                 );
 
         planning.setDeleted(true);
 
-        planningRepository.save(planning);
+        repository.save(planning);
     }
 
-    // ================= RESTORE =================
-    public void restorePlanning(Long id) {
+    // RESTORE
+    // =====================================================
 
-        ShiftPlanning planning = planningRepository.findById(id)
+    public void restore(Long id) {
+
+        ShiftPlanning planning = repository.findById(id)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Planning not found"
-                        )
+                        new ResourceNotFoundException("Planning not found")
                 );
 
         planning.setDeleted(false);
 
-        planningRepository.save(planning);
-    }
-
-    // ================= COUNT =================
-    public long countActivePlanning() {
-
-        return planningRepository
-                .countByStatusAndDeletedFalse(
-                        PlanningStatus.ACTIVE
-                );
-    }
-
-    public Page<ShiftPlanning> getEmployeePlanning(
-            String employeeId,
-            Pageable pageable
-    ) {
-
-        return planningRepository
-                .findByEmployeeIdAndDeletedFalse(
-                        employeeId,
-                        pageable
-                );
+        repository.save(planning);
     }
 }
