@@ -1,0 +1,16 @@
+apiVersion: v2
+name: gateway-service
+description: A Helm chart for API Gateway Service in HRMS
+type: application
+version: 1.0.0
+appVersion: "0.0.1-SNAPSHOT"
+keywords:
+  - gateway
+  - api-gateway
+  - hrms
+  - microservice
+maintainers:
+  - name: HRMS Team
+home: https://github.com/hrms-sfe/atlashr
+sources:
+  - https://github.com/hrms-sfe/atlashr/apps/gateway-service

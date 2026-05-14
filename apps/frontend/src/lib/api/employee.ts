@@ -103,7 +103,7 @@ export const employeeAPI = {
   listEmployees: async (
     params?: EmployeeSearchParams
   ): Promise<EmployeeListResponse> => {
-    const response = await api.get<EmployeeApiRow[]>("/employees/active");
+    const response = await api.get<EmployeeApiRow[]>("/v1/employees/active");
     let rows = response.data.map(mapRowToEmployee);
 
     if (params?.search) {
@@ -140,14 +140,14 @@ export const employeeAPI = {
   },
 
   getEmployee: async (id: string): Promise<Employee> => {
-    const response = await api.get<EmployeeApiRow>(`/employees/${id}`);
+    const response = await api.get<EmployeeApiRow>(`/v1/employees/${id}`);
     return mapRowToEmployee(response.data);
   },
 
   /** POST /employees/onboard */
   createEmployee: async (data: CreateEmployeeRequest): Promise<Employee> => {
     const response = await api.post<EmployeeApiRow>(
-      "/employees/onboard",
+      "/v1/employees/onboard",
       mapFormToOnboardPayload(data)
     );
     return mapRowToEmployee(response.data);
@@ -158,14 +158,14 @@ export const employeeAPI = {
     data: UpdateEmployeeRequest
   ): Promise<Employee> => {
     const response = await api.put<EmployeeApiRow>(
-      `/employees/${id}`,
+      `/v1/employees/${id}`,
       mapFormToUpdatePayload(data)
     );
     return mapRowToEmployee(response.data);
   },
 
   terminateEmployee: async (body: TerminateEmployeeRequest): Promise<void> => {
-    await api.post("/employees/terminate", {
+    await api.post("/v1/employees/terminate", {
       employeeId: body.employeeId,
       lastWorkingDate: body.lastWorkingDate,
       terminationReason: body.terminationReason,
@@ -174,7 +174,7 @@ export const employeeAPI = {
   },
 
   promoteEmployee: async (body: PromoteEmployeeRequest): Promise<Employee> => {
-    const response = await api.post<EmployeeApiRow>("/employees/promote", {
+    const response = await api.post<EmployeeApiRow>("/v1/employees/promote", {
       employeeId: body.employeeId,
       newDesignationId: body.newDesignationId,
       newGrade: body.newGrade,
@@ -186,7 +186,7 @@ export const employeeAPI = {
   },
 
   transferEmployee: async (body: TransferEmployeeRequest): Promise<Employee> => {
-    const response = await api.post<EmployeeApiRow>("/employees/transfer", {
+    const response = await api.post<EmployeeApiRow>("/v1/employees/transfer", {
       employeeId: body.employeeId,
       newDepartmentId: body.newDepartmentId,
       newDesignationId: body.newDesignationId,
@@ -200,7 +200,7 @@ export const employeeAPI = {
     departmentId: number
   ): Promise<Employee[]> => {
     const response = await api.get<EmployeeApiRow[]>(
-      `/employees/department/${departmentId}`
+      `/v1/employees/department/${departmentId}`
     );
     return response.data.map(mapRowToEmployee);
   },

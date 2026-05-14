@@ -1,0 +1,126 @@
+# Default values for gateway-service
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Replica count
+replicaCount: 2
+
+# Image configuration
+image:
+  repository: hrms/gateway-service
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# Container security context
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Service configuration
+service:
+  type: LoadBalancer
+  port: 8084
+  targetPort: 8084
+  annotations: {}
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: gateway.hrms.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Resource requests and limits
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Application configuration
+app:
+  port: 8084
+  # Logging level
+  logLevel: INFO
+  # Rate limiting
+  rateLimiting:
+    enabled: true
+    requestsPerMinute: 100
+
+# Environment variables
+env:
+  SPRING_PROFILES_ACTIVE: k8s
+  LOG_LEVEL: INFO
+  RATE_LIMIT_ENABLED: "true"
+  RATE_LIMIT_REQUESTS_PER_MINUTE: "100"
+  FRONTEND_URL: "http://localhost:3000"
+
+# Secrets (referenced from Kubernetes Secrets)
+secrets:
+  jwtSecret: "jwt-secret"        # Name of Secret containing JWT_SECRET
+  redisPassword: "redis-secret"  # Name of Secret containing Redis password
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 3
+
+# Database configuration (Redis for rate limiting)
+redis:
+  enabled: false  # Redis is deployed separately
+  host: redis
+  port: 6379
+
+# Service mesh integration (optional)
+serviceMesh:
+  enabled: false
+  istio:
+    enabled: false
+    virtualService:
+      enabled: false

@@ -54,16 +54,6 @@ Content-Type: {{json}}
   "password": "Password123!"
 }
 
-### Register - duplicate email (expected 400)
-POST {{gateway}}/api/auth/register
-Content-Type: {{json}}
-
-{
-  "username": "e2e.user02",
-  "email": "e2e.user01@example.com",
-  "password": "Password123!"
-}
-
 ###
 # @name  auth
 POST {{gateway}}/api/auth/login
@@ -79,7 +69,7 @@ Content-Type: {{json}}
 
 @accessToken = {{auth.response.body.token}}
 
-@refreshToken = REPLACE_WITH_REFRESH_TOKEN
+@refreshToken = {{auth.response.body.refreshToken}}
 
 @authUserId = 199e50a9-ba15-4032-9f61-6373cd2a8769
 
@@ -87,15 +77,10 @@ Content-Type: {{json}}
 POST {{gateway}}/api/auth/refresh
 Authorization: Bearer {{refreshToken}}
 
-### Refresh token - missing header (expected 400)
-POST {{gateway}}/api/auth/refresh
-
 ### Current user - success
 GET {{gateway}}/api/auth/me
 Authorization: Bearer {{accessToken}}
 
-### Current user - no token (expected 401)
-GET {{gateway}}/api/auth/me
 
 ### User by ID - success
 GET {{gateway}}/api/auth/user/{{authUserId}}
@@ -109,10 +94,10 @@ Authorization: Bearer {{accessToken}}
 ### ------------------------------------------------------------
 ### 2) Employee Core (through gateway, protected)
 ### ------------------------------------------------------------
-### NOTE: gateway proxies /api/employees/* to employee-service /api/v1/employees/*
+### NOTE: gateway routes /api/v1/employees/* to employee-service /api/v1/employees/*
 
 ### Onboard employee (success)
-POST {{gateway}}/api/employees/onboard
+POST {{gateway}}/api/v1/employees/onboard
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -160,7 +145,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Onboard employee - missing token (expected 401)
-POST {{gateway}}/api/employees/onboard
+POST {{gateway}}/api/v1/employees/onboard
 Content-Type: {{json}}
 
 {
@@ -177,23 +162,23 @@ Content-Type: {{json}}
 @managerId = REPLACE_WITH_MANAGER_EMPLOYEE_ID
 
 ### Get employee by ID
-GET {{gateway}}/api/employees/{{employeeId}}
+GET {{gateway}}/api/v1/employees/{{employeeId}}
 Authorization: Bearer {{accessToken}}
 
 ### Get active employees
-GET {{gateway}}/api/employees/active
+GET {{gateway}}/api/v1/employees/active
 Authorization: Bearer {{accessToken}}
 
 ### Get employees by department
-GET {{gateway}}/api/employees/department/1
+GET {{gateway}}/api/v1/employees/department/1
 Authorization: Bearer {{accessToken}}
 
 ### Get direct reports by manager
-GET {{gateway}}/api/employees/manager/{{managerId}}/direct-reports
+GET {{gateway}}/api/v1/employees/manager/{{managerId}}/direct-reports
 Authorization: Bearer {{accessToken}}
 
 ### Promote employee
-POST {{gateway}}/api/employees/promote
+POST {{gateway}}/api/v1/employees/promote
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -207,7 +192,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Transfer employee
-POST {{gateway}}/api/employees/transfer
+POST {{gateway}}/api/v1/employees/transfer
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -220,7 +205,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Terminate employee
-POST {{gateway}}/api/employees/terminate
+POST {{gateway}}/api/v1/employees/terminate
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 

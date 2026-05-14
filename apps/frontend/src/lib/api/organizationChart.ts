@@ -5,19 +5,19 @@ export const organizationChartAPI = {
   byManager: (managerId: string) =>
     api
       .get<OrgChartNode[]>(
-        `/organization-chart/manager/${encodeURIComponent(managerId)}`
+        `/v1/organization-chart/manager/${encodeURIComponent(managerId)}`
       )
       .then((r) => r.data),
   byDepartment: (departmentId: number) =>
     api
       .get<OrgChartNode[]>(
-        `/organization-chart/department/${departmentId}`
+        `/v1/organization-chart/department/${departmentId}`
       )
       .then((r) => r.data),
   byEmployee: (employeeId: string) =>
     api
       .get<OrgChartNode>(
-        `/organization-chart/employee/${encodeURIComponent(employeeId)}`
+        `/v1/organization-chart/employee/${encodeURIComponent(employeeId)}`
       )
       .then((r) => r.data),
 };

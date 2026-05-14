@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gateway-service.fullname" . }}-config
+  labels:
+    {{- include "gateway-service.labels" . | nindent 4 }}
+data:
+  # Gateway route configuration (loaded from application.properties)
+  SPRING_APPLICATION_NAME: "gateway-service"
+  SPRING_PROFILES_ACTIVE: "k8s"
+  SERVER_PORT: "8084"
+  
+  # Logging
+  LOGGING_LEVEL_ROOT: "{{ .Values.app.logLevel }}"
+  LOGGING_LEVEL_COM_HRMS_GATEWAY: "{{ .Values.app.logLevel }}"
+  
+  # Rate limiting
+  RATE_LIMIT_ENABLED: "{{ .Values.app.rateLimiting.enabled }}"
+  RATE_LIMIT_REQUESTS_PER_MINUTE: "{{ .Values.app.rateLimiting.requestsPerMinute }}"
+  
+  # Frontend CORS
+  FRONTEND_URL: "{{ .Values.env.FRONTEND_URL }}"

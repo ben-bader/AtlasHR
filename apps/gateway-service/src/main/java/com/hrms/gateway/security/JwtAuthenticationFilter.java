@@ -18,10 +18,17 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 
 /**
- * JWT Authentication Filter
+ * JWT Authentication Filter - Gateway Level
  * 
- * GlobalFilter for Gateway request processing.
- * Validates JWT tokens and injects user context headers.
+ * SINGLE POINT OF SECURITY for entire system.
+ * 
+ * Responsibilities:
+ * - Validate JWT tokens
+ * - Inject X-User-* headers for downstream services
+ * - Handle CORS headers on error responses
+ * - Never block OPTIONS preflight requests
+ * 
+ * Microservices blindly trust X-User-* headers from gateway.
  */
 @Component
 @Slf4j
@@ -34,52 +41,63 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 	private static final String[] PUBLIC_ROUTES = {
 		"/api/auth/login",
 		"/api/auth/register",
-		"/api/auth/refresh",
-		"/health",
-		"/actuator"
+		"/api/auth/refresh"
 	};
+
+	/**
+	 * Filter execution order - run after security filters
+	 */
+
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 		String path = exchange.getRequest().getPath().value();
+		String method = exchange.getRequest().getMethod().toString();
 
-		// Skip filter for public routes and preflight requests
-		if (isPublicRoute(path) || exchange.getRequest().getMethod().toString().equals("OPTIONS")) {
+		log.debug("JWT Filter: {} {}", method, path);
+
+		// ✅ ALWAYS allow OPTIONS preflight requests (no JWT needed)
+		if ("OPTIONS".equals(method)) {
+			log.debug("Allowing OPTIONS preflight request");
 			return chain.filter(exchange);
 		}
 
-		// Extract Authorization header
-		String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
-		if (authHeader == null || authHeader.isEmpty()) {
-			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-			return exchange.getResponse().setComplete();
+		// ✅ ALLOW public routes without JWT
+		if (isPublicRoute(path)) {
+			log.debug("Public route {} - no auth required", path);
+			return chain.filter(exchange);
 		}
 
-		// Parse Bearer token
-		if (!authHeader.startsWith("Bearer ")) {
-			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-			return exchange.getResponse().setComplete();
+		// 🔐 PROTECTED ROUTES - require JWT
+
+		String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+		// Missing or invalid Bearer token
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			log.warn("Missing/invalid JWT for {}", path);
+			return sendUnauthorizedWithCorsHeaders(exchange);
 		}
 
 		String token = authHeader.substring(7); // Remove "Bearer " prefix
 
 		try {
-			// Validate token
+			// Validate JWT signature and expiration
 			Claims claims = jwtUtil.validateToken(token);
 
-			// Check expiration
 			if (jwtUtil.isTokenExpired(claims)) {
-				exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-				return exchange.getResponse().setComplete();
+				log.warn("Token expired for {}", path);
+				return sendUnauthorizedWithCorsHeaders(exchange);
 			}
 
-			// Extract user info
+			// ✅ Extract user info from JWT
 			String userId = jwtUtil.getUserId(claims);
 			String username = jwtUtil.getUsername(claims);
 			String roles = String.join(",", jwtUtil.getRoles(claims));
 
-			// Inject headers for downstream services
+			log.debug("JWT valid for user: {} ({})", username, userId);
+
+			// ✅ INJECT HEADERS - Gateway passes user context to services
+			// Services read these headers, no JWT parsing needed
 			ServerWebExchange mutatedExchange = exchange.mutate()
 				.request(r -> r
 					.header("X-User-Id", userId)
@@ -89,11 +107,33 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
 			return chain.filter(mutatedExchange);
 
-		} catch (JwtException e) {
-			exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-			return exchange.getResponse().setComplete();
+		} catch (JwtException | IllegalArgumentException e) {
+			log.error("JWT validation failed: {}", e.getMessage());
+			return sendUnauthorizedWithCorsHeaders(exchange);
 		}
 	}
+
+	/**
+	 * Send 401 with CORS headers
+	 * 
+	 * This fixes the browser "No 'Access-Control-Allow-Origin' header" error.
+	 * Browser gets CORS headers in error response, preventing CORS block.
+	 */
+private Mono<Void> sendUnauthorizedWithCorsHeaders(ServerWebExchange exchange) {
+    String origin = exchange.getRequest().getHeaders().getOrigin();
+
+    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+
+    if (origin != null) {
+        exchange.getResponse().getHeaders().set("Access-Control-Allow-Origin", origin);
+    }
+
+    exchange.getResponse().getHeaders().set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+    exchange.getResponse().getHeaders().set("Access-Control-Allow-Headers", "Authorization,Content-Type");
+    exchange.getResponse().getHeaders().set("Access-Control-Allow-Credentials", "true");
+
+    return exchange.getResponse().setComplete();
+}
 
 	/**
 	 * Check if route is public (no auth required)

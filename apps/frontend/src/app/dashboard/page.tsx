@@ -52,7 +52,7 @@ export default function DashboardPage() {
                 Welcome, {user?.username || "User"}!
               </span>
               <button
-                onClick={logout}
+                onClick={() => { logout() ; router.push("/")}}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Logout

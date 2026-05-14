@@ -34,8 +34,8 @@ public class GatewayConfig {
 
 			// Employee/HR Service - handles all employee data and organization info
 			.route("employee-service", r -> r
-				.path("/api/v1/**")
-				.uri("http://hrms-employee-service:8083"))
+			.path("/api/**")
+			.uri("http://hrms-employee-service:8083"))
 
 			.build();
 	}

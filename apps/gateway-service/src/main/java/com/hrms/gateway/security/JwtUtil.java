@@ -57,17 +57,29 @@ public class JwtUtil {
 
 	/**
 	 * Extracts username from claims
+	 * Falls back to 'username' claim if subject is not set
 	 */
 	public String getUsername(Claims claims) {
-		return claims.getSubject();
+		String subject = claims.getSubject();
+		if (subject != null && !subject.isEmpty()) {
+			return subject;
+		}
+		// Fallback to username claim
+		Object username = claims.get("username");
+		return username != null ? username.toString() : null;
 	}
 
 	/**
 	 * Extracts userId from claims
+	 * Uses username if userId claim is not present
 	 */
 	public String getUserId(Claims claims) {
 		Object userId = claims.get("userId");
-		return userId != null ? userId.toString() : null;
+		if (userId != null) {
+			return userId.toString();
+		}
+		// Fallback to username as userId if not explicitly set
+		return getUsername(claims);
 	}
 
 	/**
