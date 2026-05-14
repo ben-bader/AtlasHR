@@ -1,16 +1,26 @@
 package com.hrms.employee.presentation.controller;
 
-import com.hrms.employee.application.dto.*;
-import com.hrms.employee.application.service.DesignationService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.hrms.employee.application.dto.CreateDesignationRequest;
+import com.hrms.employee.application.dto.DesignationResponse;
+import com.hrms.employee.application.service.DesignationService;
+
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
-@RequestMapping("/api/v1/designations")
+@RequestMapping("/api/designations")
 @Slf4j
 public class DesignationController {
 

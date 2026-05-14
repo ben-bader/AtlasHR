@@ -1,15 +1,20 @@
 package com.hrms.employee.presentation.controller;
 
-import com.hrms.employee.application.service.OrganizationChartService;
-import com.hrms.employee.domain.model.OrganizationChart;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.hrms.employee.application.service.OrganizationChartService;
+import com.hrms.employee.domain.model.OrganizationChart;
+
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
-@RequestMapping("/api/v1/organization-chart")
+@RequestMapping("/api/organization-chart")
 @Slf4j
 public class OrganizationChartController {
 

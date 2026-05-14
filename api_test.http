@@ -94,10 +94,10 @@ Authorization: Bearer {{accessToken}}
 ### ------------------------------------------------------------
 ### 2) Employee Core (through gateway, protected)
 ### ------------------------------------------------------------
-### NOTE: gateway routes /api/v1/employees/* to employee-service /api/v1/employees/*
+### NOTE: gateway routes /api/employees/* to employee-service /api/employees/*
 
 ### Onboard employee (success)
-POST {{gateway}}/api/v1/employees/onboard
+POST {{gateway}}/api/employees/onboard
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -145,7 +145,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Onboard employee - missing token (expected 401)
-POST {{gateway}}/api/v1/employees/onboard
+POST {{gateway}}/api/employees/onboard
 Content-Type: {{json}}
 
 {
@@ -162,23 +162,23 @@ Content-Type: {{json}}
 @managerId = REPLACE_WITH_MANAGER_EMPLOYEE_ID
 
 ### Get employee by ID
-GET {{gateway}}/api/v1/employees/{{employeeId}}
+GET {{gateway}}/api/employees/{{employeeId}}
 Authorization: Bearer {{accessToken}}
 
 ### Get active employees
-GET {{gateway}}/api/v1/employees/active
+GET {{gateway}}/api/employees/active
 Authorization: Bearer {{accessToken}}
 
 ### Get employees by department
-GET {{gateway}}/api/v1/employees/department/1
+GET {{gateway}}/api/employees/department/1
 Authorization: Bearer {{accessToken}}
 
 ### Get direct reports by manager
-GET {{gateway}}/api/v1/employees/manager/{{managerId}}/direct-reports
+GET {{gateway}}/api/employees/manager/{{managerId}}/direct-reports
 Authorization: Bearer {{accessToken}}
 
 ### Promote employee
-POST {{gateway}}/api/v1/employees/promote
+POST {{gateway}}/api/employees/promote
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -192,7 +192,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Transfer employee
-POST {{gateway}}/api/v1/employees/transfer
+POST {{gateway}}/api/employees/transfer
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -205,7 +205,7 @@ Authorization: Bearer {{accessToken}}
 }
 
 ### Terminate employee
-POST {{gateway}}/api/v1/employees/terminate
+POST {{gateway}}/api/employees/terminate
 Content-Type: {{json}}
 Authorization: Bearer {{accessToken}}
 
@@ -225,7 +225,7 @@ Authorization: Bearer {{accessToken}}
 ### ---- Departments ----
 
 ### Create department
-POST {{employeeService}}/api/v1/departments
+POST {{employeeService}}/api/departments
 Content-Type: {{json}}
 
 {
@@ -237,16 +237,16 @@ Content-Type: {{json}}
 }
 
 ### Get all departments
-GET {{employeeService}}/api/v1/departments
+GET {{employeeService}}/api/departments
 
 ### Get department by ID
-GET {{employeeService}}/api/v1/departments/1
+GET {{employeeService}}/api/departments/1
 
 ### Get sub-departments
-GET {{employeeService}}/api/v1/departments/1/sub-departments
+GET {{employeeService}}/api/departments/1/sub-departments
 
 ### Update department
-PUT {{employeeService}}/api/v1/departments/1
+PUT {{employeeService}}/api/departments/1
 Content-Type: {{json}}
 
 {
@@ -258,13 +258,13 @@ Content-Type: {{json}}
 }
 
 ### Delete department (archive)
-DELETE {{employeeService}}/api/v1/departments/1
+DELETE {{employeeService}}/api/departments/1
 
 
 ### ---- Designations ----
 
 ### Create designation
-POST {{employeeService}}/api/v1/designations
+POST {{employeeService}}/api/designations
 Content-Type: {{json}}
 
 {
@@ -276,13 +276,13 @@ Content-Type: {{json}}
 }
 
 ### Get all designations
-GET {{employeeService}}/api/v1/designations
+GET {{employeeService}}/api/designations
 
 ### Get designation by ID
-GET {{employeeService}}/api/v1/designations/DES-001
+GET {{employeeService}}/api/designations/DES-001
 
 ### Update designation
-PUT {{employeeService}}/api/v1/designations/DES-001
+PUT {{employeeService}}/api/designations/DES-001
 Content-Type: {{json}}
 
 {
@@ -294,13 +294,13 @@ Content-Type: {{json}}
 }
 
 ### Delete designation (deprecate)
-DELETE {{employeeService}}/api/v1/designations/DES-001
+DELETE {{employeeService}}/api/designations/DES-001
 
 
 ### ---- Skills ----
 
 ### Add skill
-POST {{employeeService}}/api/v1/skills
+POST {{employeeService}}/api/skills
 Content-Type: {{json}}
 
 {
@@ -313,13 +313,13 @@ Content-Type: {{json}}
 @skillId = REPLACE_WITH_SKILL_ID
 
 ### Get employee skills
-GET {{employeeService}}/api/v1/skills/employee/{{employeeId}}
+GET {{employeeService}}/api/skills/employee/{{employeeId}}
 
 ### Search employees by skill
-GET {{employeeService}}/api/v1/skills/search/Java
+GET {{employeeService}}/api/skills/search/Java
 
 ### Update skill
-PUT {{employeeService}}/api/v1/skills/{{skillId}}
+PUT {{employeeService}}/api/skills/{{skillId}}
 Content-Type: {{json}}
 
 {
@@ -330,7 +330,7 @@ Content-Type: {{json}}
 }
 
 ### Remove skill
-DELETE {{employeeService}}/api/v1/skills/{{skillId}}
+DELETE {{employeeService}}/api/skills/{{skillId}}
 
 
 ### ---- Insurance ----
@@ -381,10 +381,10 @@ DELETE {{employeeService}}/api/employees/insurances/{{insuranceId}}
 ### ---- Organization Chart ----
 
 ### Manager hierarchy
-GET {{employeeService}}/api/v1/organization-chart/manager/{{managerId}}
+GET {{employeeService}}/api/organization-chart/manager/{{managerId}}
 
 ### Department hierarchy
-GET {{employeeService}}/api/v1/organization-chart/department/1
+GET {{employeeService}}/api/organization-chart/department/1
 
 ### Employee hierarchy
-GET {{employeeService}}/api/v1/organization-chart/employee/{{employeeId}}
+GET {{employeeService}}/api/organization-chart/employee/{{employeeId}}
