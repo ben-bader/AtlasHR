@@ -37,15 +37,15 @@ public class EmployeeInsuranceService {
      * Add a new insurance for an employee
      */
     public EmployeeInsuranceResponse addInsurance(AddInsuranceRequest request) {
-        log.info("Adding insurance for employee: {}", request.getEmployeeId());
+        log.info("Adding insurance for employee: {}", request.getId());
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException(ApplicationConstants.EMPLOYEE_NOT_FOUND));
 
         String uniquePolicyNumber = UUID.randomUUID().toString();
 
         EmployeeInsurance insurance = EmployeeInsurance.builder()
-                .insuranceId(idGeneratorFactory.generateInsuranceId())
+                .id(idGeneratorFactory.generateInsuranceId())
                 .employee(employee)
                 .policyNumber(request.getPolicyNumber())
                 .policyNumberUnique(uniquePolicyNumber)
@@ -63,7 +63,7 @@ public class EmployeeInsuranceService {
                 .build();
 
         insurance = employeeInsuranceRepository.save(insurance);
-        log.info("Insurance added successfully: {}", insurance.getInsuranceId());
+        log.info("Insurance added successfully: {}", insurance.getId());
 
         return mapToResponse(insurance);
     }
@@ -162,8 +162,8 @@ public class EmployeeInsuranceService {
 
     private EmployeeInsuranceResponse mapToResponse(EmployeeInsurance insurance) {
         return EmployeeInsuranceResponse.builder()
-                .insuranceId(insurance.getInsuranceId())
-                .employeeId(insurance.getEmployee().getEmployeeId())
+                .id(insurance.getId())
+                .employeeId(insurance.getEmployee().getId())
                 .policyNumber(insurance.getPolicyNumber())
                 .insuranceType(insurance.getInsuranceType().toString())
                 .providerName(insurance.getProviderName())

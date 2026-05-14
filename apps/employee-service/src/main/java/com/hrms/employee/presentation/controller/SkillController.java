@@ -22,7 +22,7 @@ public class SkillController {
 
     @PostMapping
     public ResponseEntity<EmployeeSkillResponse> addSkill(@RequestBody AddEmployeeSkillRequest request) {
-        log.info("Adding skill for employee: {}", request.getEmployeeId());
+        log.info("Adding skill for employee: {}", request.getId());
         EmployeeSkillResponse response = skillService.addSkill(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

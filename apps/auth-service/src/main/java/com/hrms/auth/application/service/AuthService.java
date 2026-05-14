@@ -122,7 +122,7 @@ public class AuthService implements UserDetailsService {
                 .roles(roles)
                 .build();
 
-        eventPublisher.publishUserCreatedEvent(event);
+        eventPublisher.publishUserCreated(event);
 
         log.info("User registered successfully: {}", savedUser.getUsername());
 

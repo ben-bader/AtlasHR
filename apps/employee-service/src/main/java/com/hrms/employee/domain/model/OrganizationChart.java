@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class OrganizationChart {
 
     @Id
-    @Column(length = 20)
-    private String chartId;
+    @Column(name = "chart_id", length = 20)
+    private String id;
 
     @OneToOne
     @JoinColumn(name = "employee_id", unique = true, nullable = false)

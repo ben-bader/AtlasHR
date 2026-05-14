@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface EmployeeSkillRepository extends JpaRepository<EmployeeSkill, String> {
 
-    @Query("SELECT es FROM EmployeeSkill es WHERE es.employee.employeeId = :employeeId")
+    @Query("SELECT es FROM EmployeeSkill es WHERE es.employee.id = :employeeId")
     List<EmployeeSkill> findByEmployeeId(@Param("employeeId") String employeeId);
     List<EmployeeSkill> findBySkillNameAndStatus(String skillName, SkillStatus status);
 }

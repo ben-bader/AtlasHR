@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
-import { useEmployeeList, useDeleteEmployee } from "@/hooks/useEmployee"
+import { useEmployeeList, useTerminateEmployee } from "@/hooks/useEmployee"
 import { Employee, EmployeeSearchParams } from "@/lib/types"
 import { Trash2, Edit, Eye, Plus, Loader } from "lucide-react"
 
@@ -24,11 +24,13 @@ export function EmployeeListView() {
     pageSize: 10,
   })
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showTerminateConfirm, setShowTerminateConfirm] = useState(false)
+  const [lastWorkingDate, setLastWorkingDate] = useState("")
+  const [terminationReason, setTerminationReason] = useState("")
 
   const { employees, isLoading, error, total, page, totalPages } =
     useEmployeeList(searchParams)
-  const { deleteEmployee, isLoading: isDeleting } = useDeleteEmployee()
+  const { terminateEmployee, isLoading: isTerminating } = useTerminateEmployee()
 
   const handleSearch = (query: string) => {
     setSearchParams((prev) => ({
@@ -38,15 +40,21 @@ export function EmployeeListView() {
     }))
   }
 
-  const handleDelete = async () => {
-    if (!selectedEmployee) return
+  const handleTerminate = async () => {
+    if (!selectedEmployee || !lastWorkingDate) return
 
     try {
-      await deleteEmployee(selectedEmployee.id)
-      setShowDeleteConfirm(false)
+      await terminateEmployee({
+        employeeId: selectedEmployee.id,
+        lastWorkingDate,
+        terminationReason: terminationReason || undefined,
+      })
+      setShowTerminateConfirm(false)
       setSelectedEmployee(null)
+      setLastWorkingDate("")
+      setTerminationReason("")
     } catch (err) {
-      console.error("Failed to delete employee:", err)
+      console.error("Failed to terminate employee:", err)
     }
   }
 
@@ -149,9 +157,9 @@ export function EmployeeListView() {
                       size="icon"
                       onClick={() => {
                         setSelectedEmployee(employee)
-                        setShowDeleteConfirm(true)
+                        setShowTerminateConfirm(true)
                       }}
-                      title="Delete"
+                      title="Terminate"
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -187,27 +195,35 @@ export function EmployeeListView() {
         </div>
       )}
 
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <Dialog open={showTerminateConfirm} onOpenChange={setShowTerminateConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Employee</DialogTitle>
+            <DialogTitle>Terminate employee</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedEmployee?.firstName} {selectedEmployee?.lastName}? This action cannot be undone.
+              Posts to <span className="font-mono text-xs">POST /employees/terminate</span> for{" "}
+              {selectedEmployee?.firstName} {selectedEmployee?.lastName}.
             </DialogDescription>
           </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Last working date *</label>
+              <Input type="date" value={lastWorkingDate} onChange={(e) => setLastWorkingDate(e.target.value)} />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Reason</label>
+              <Input
+                placeholder="Resignation, restructuring..."
+                value={terminationReason}
+                onChange={(e) => setTerminationReason(e.target.value)}
+              />
+            </div>
+          </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
+            <Button variant="outline" onClick={() => setShowTerminateConfirm(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
+            <Button variant="destructive" onClick={handleTerminate} disabled={isTerminating || !lastWorkingDate}>
+              {isTerminating ? "Submitting..." : "Terminate"}
             </Button>
           </DialogFooter>
         </DialogContent>

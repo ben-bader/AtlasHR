@@ -29,7 +29,7 @@ public class DesignationService {
         log.info("Creating designation: {}", request.getDesignationName());
 
         Designation designation = Designation.builder()
-                .designationId(idGeneratorFactory.generateDesignationId())
+                .id(idGeneratorFactory.generateDesignationId())
                 .designationName(request.getDesignationName())
                 .description(request.getDescription())
                 .designationCode(request.getDesignationCode())
@@ -39,7 +39,7 @@ public class DesignationService {
                 .build();
 
         designation = designationRepository.save(designation);
-        log.info("Designation created: {}", designation.getDesignationId());
+        log.info("Designation created: {}", designation.getId());
 
         return mapToResponse(designation);
     }
@@ -80,7 +80,7 @@ public class DesignationService {
 
     private DesignationResponse mapToResponse(Designation designation) {
         return DesignationResponse.builder()
-                .designationId(designation.getDesignationId())
+                .id(designation.getId())
                 .designationName(designation.getDesignationName())
                 .description(designation.getDescription())
                 .designationCode(designation.getDesignationCode())

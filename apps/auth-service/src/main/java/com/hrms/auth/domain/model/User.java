@@ -25,15 +25,17 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users", indexes = {@Index(name = "idx_username", columnList = "username", unique = true)})
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -112,4 +114,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return this.enabled;
     }
+
 }

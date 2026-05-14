@@ -18,8 +18,8 @@ import com.hrms.employee.common.enums.InsuranceType;
 public class EmployeeInsurance {
 
     @Id
-    @Column(length = 20)
-    private String insuranceId;
+    @Column(name = "insurance_id", length = 20)
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)

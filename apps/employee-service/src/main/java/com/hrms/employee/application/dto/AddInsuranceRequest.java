@@ -2,6 +2,7 @@ package com.hrms.employee.application.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +16,8 @@ import lombok.Setter;
 @Builder
 public class AddInsuranceRequest {
 
-    private String employeeId;
+    @JsonProperty("employeeId")
+    private String id;
     private String policyNumber;
     private String insuranceType;
     private String providerName;

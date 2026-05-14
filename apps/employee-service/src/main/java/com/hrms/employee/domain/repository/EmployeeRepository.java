@@ -17,11 +17,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
     Optional<Employee> findByContactInfo_PrimaryPhone(String primaryPhone);
 
-    @Query("SELECT e FROM Employee e WHERE e.department.departmentId = :departmentId")
+    @Query("SELECT e FROM Employee e WHERE e.department.id = :departmentId")
     List<Employee> findEmployeesByDepartmentId(@Param("departmentId") Long departmentId);
 
     List<Employee> findByStatus(EmploymentStatus status);
 
     // 🔥 FIXED (nested property path)
-    List<Employee> findByReportingManager_EmployeeId(String employeeId);
+    List<Employee> findByReportingManager_Id(String employeeId);
 }

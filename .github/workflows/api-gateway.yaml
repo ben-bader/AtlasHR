@@ -3,12 +3,12 @@ name: API Gateway CI/CD
 on:
   push:
     paths:
-      - "gateway/**"
+      - "apps/gateway-service/**"
       - ".github/workflows/api-gateway.yaml"
     branches: [ "main", "develop" ]
   pull_request:
     paths:
-      - "gateway/**"
+      - "apps/gateway-service/**"
     branches: [ "main", "develop" ]
 
 jobs:

@@ -1,7 +1,7 @@
 # =========================
 # BUILD STAGE
 # =========================
-FROM node:20-alpine AS builder
+FROM mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm AS builder
 
 WORKDIR /app
 
@@ -24,11 +24,12 @@ RUN npm run build
 # =========================
 # RUNTIME STAGE
 # =========================
-FROM node:20-alpine
+FROM mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3001
 
 # install only production deps
 COPY package*.json ./
@@ -39,10 +40,10 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-EXPOSE 3000
+EXPOSE 3001
 
 # healthcheck using node (no curl/wget dependency)
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', r => process.exit(r.statusCode === 200 ? 0 : 1))"
+  CMD node -e "require('http').get('http://localhost:3001', r => process.exit(r.statusCode === 200 ? 0 : 1))"
 
 CMD ["node", "server.js"]

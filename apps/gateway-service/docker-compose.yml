@@ -1,0 +1,49 @@
+services:
+  gateway-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hrms-gateway-service
+
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8084
+
+      # JWT Security
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
+
+      # Redis (shared infrastructure)
+      SPRING_DATA_REDIS_HOST: hrms-redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+      # Rate Limiting
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_REQUESTS_PER_MINUTE: "100"
+
+      # Frontend CORS
+      FRONTEND_URL: http://localhost:3000
+
+      # Logging
+      LOG_LEVEL: INFO
+
+    ports:
+      - "8084:8084"
+
+    networks:
+      - hrms-network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  hrms-network:
+    name: hrms-network
+    external: true

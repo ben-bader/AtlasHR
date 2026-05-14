@@ -31,13 +31,13 @@ public class EmployeeSkillService {
     }
 
     public EmployeeSkillResponse addSkill(AddEmployeeSkillRequest request) {
-        log.info("Adding skill to employee: {}", request.getEmployeeId());
+        log.info("Adding skill to employee: {}", request.getId());
 
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
+        Employee employee = employeeRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
         EmployeeSkill skill = EmployeeSkill.builder()
-                .skillId(idGeneratorFactory.generateSkillId())
+                .id(idGeneratorFactory.generateSkillId())
                 .employee(employee)
                 .skillName(request.getSkillName())
                 .competencyLevel(CompetencyLevel.valueOf(request.getCompetencyLevel()))
@@ -46,7 +46,7 @@ public class EmployeeSkillService {
                 .build();
 
         skill = employeeSkillRepository.save(skill);
-        log.info("Skill added to employee: {}", skill.getSkillId());
+        log.info("Skill added to employee: {}", skill.getId());
 
         return mapToResponse(skill);
     }
@@ -88,8 +88,8 @@ public class EmployeeSkillService {
 
     private EmployeeSkillResponse mapToResponse(EmployeeSkill skill) {
         return EmployeeSkillResponse.builder()
-                .skillId(skill.getSkillId())
-                .employeeId(skill.getEmployee().getEmployeeId())
+                .id(skill.getId())
+                .employeeId(skill.getEmployee().getId())
                 .skillName(skill.getSkillName())
                 .competencyLevel(skill.getCompetencyLevel().toString())
                 .certification(skill.getCertification())

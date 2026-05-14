@@ -5,6 +5,7 @@ import { GalleryVerticalEndIcon } from "lucide-react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store/auth"
+import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -18,15 +19,12 @@ export default function LoginPage() {
   }, [isAuthenticated, router])
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEndIcon className="size-4" />
+    <div className="grid h-dvh lg:grid-cols-2">
+      <div className="flex flex-col gap-2 md:p-10">
+        <div className="flex justify-center md:justify-start">
+            <div className="flex items-center justify-center">
+              <Image src={"/logo.png"} alt="AtlasHR" width={200} height={200} className="-my-5"/>
             </div>
-            AtlasHR
-          </a>
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">

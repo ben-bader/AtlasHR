@@ -5,8 +5,6 @@ import com.hrms.employee.common.exception.InvalidOperationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -93,43 +91,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handle authentication errors
+     * Handle generic runtime exceptions
      */
-    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationError(
-            AuthenticationCredentialsNotFoundException ex,
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(
+            RuntimeException ex,
             WebRequest request) {
-        log.warn("Authentication error: {}", ex.getMessage());
+        log.error("Runtime error: {}", ex.getMessage(), ex);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error("Unauthorized")
-                .message("Authentication required")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("Internal Server Error")
+                .message("An unexpected error occurred")
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-    }
-
-    /**
-     * Handle authorization errors
-     */
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAuthorizationError(
-            AuthorizationDeniedException ex,
-            WebRequest request) {
-        log.warn("Authorization error: {}", ex.getMessage());
-
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.FORBIDDEN.value())
-                .error("Forbidden")
-                .message("You don't have permission to access this resource")
-                .path(request.getDescription(false).replace("uri=", ""))
-                .build();
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

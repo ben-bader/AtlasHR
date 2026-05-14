@@ -1,0 +1,390 @@
+### HRMS Full System API Test Suite
+### Use with VSCode/Cursor REST Client (.http)
+### Execute top-to-bottom. Replace token/id placeholders as instructed.
+
+@gateway = http://localhost:8084
+@authService = http://localhost:8081
+@employeeService = http://localhost:8083
+@json = application/json
+
+### ------------------------------------------------------------
+### 0) Infrastructure / Service Health
+### ------------------------------------------------------------
+
+### Gateway root
+GET {{gateway}}/
+
+###
+GET {{gateway}}/health
+
+###
+GET {{gateway}}/health/ready
+
+###
+GET {{gateway}}/api/auth/health
+
+###
+GET {{authService}}/actuator/health
+
+###
+GET {{employeeService}}/actuator/health
+
+
+### ------------------------------------------------------------
+### 1) Authentication Flow (through gateway)
+### ------------------------------------------------------------
+
+### Register - success
+POST {{gateway}}/api/auth/register
+Content-Type: {{json}}
+
+{
+  "username": "e2e.user01",
+  "email": "e2e.user01@example.com",
+  "password": "Password123!"
+}
+
+### Register - duplicate username (expected 400)
+POST {{gateway}}/api/auth/register
+Content-Type: {{json}}
+
+{
+  "username": "e2e.user01",
+  "email": "other-email@example.com",
+  "password": "Password123!"
+}
+
+###
+# @name  auth
+POST {{gateway}}/api/auth/login
+Content-Type: {{json}}
+
+{
+  "username": "e2e.user01",
+  "password": "Password123!"
+}
+
+### Login - wrong password (expected 401)
+
+
+@accessToken = {{auth.response.body.token}}
+
+@refreshToken = {{auth.response.body.refreshToken}}
+
+@authUserId = 199e50a9-ba15-4032-9f61-6373cd2a8769
+
+### Refresh token - success
+POST {{gateway}}/api/auth/refresh
+Authorization: Bearer {{refreshToken}}
+
+### Current user - success
+GET {{gateway}}/api/auth/me
+Authorization: Bearer {{accessToken}}
+
+
+### User by ID - success
+GET {{gateway}}/api/auth/user/{{authUserId}}
+Authorization: Bearer {{accessToken}}
+
+### User by ID - invalid UUID (expected 400/404)
+GET {{gateway}}/api/auth/user/not-a-uuid
+Authorization: Bearer {{accessToken}}
+
+
+### ------------------------------------------------------------
+### 2) Employee Core (through gateway, protected)
+### ------------------------------------------------------------
+### NOTE: gateway routes /api/v1/employees/* to employee-service /api/v1/employees/*
+
+### Onboard employee (success)
+POST {{gateway}}/api/v1/employees/onboard
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "firstName": "Amine",
+  "lastName": "Bennani",
+  "email": "amine.bennani@example.com",
+  "CIN": "AB123456",
+  "dateOfBirth": "1994-05-12",
+  "gender": "MALE",
+  "nationality": "Moroccan",
+  "bloodGroup": "O+",
+  "maritalStatus": "SINGLE",
+  "primaryPhone": "0612345678",
+  "alternatePhone": "0712345678",
+  "currentAddress": "123 Hassan II Blvd",
+  "city": "Casablanca",
+  "province": "Casablanca-Settat",
+  "codePostal": "20000",
+  "accountHolderName": "Amine Bennani",
+  "accountNumber": "1234567890123456",
+  "RIB": "MA6401151900000123456789014",
+  "bankName": "Attijariwafa",
+  "accountType": "CHECKING",
+  "emergencyContactName": "Sara Bennani",
+  "emergencyContactRelationship": "SISTER",
+  "emergencyContactPhone": "0666666666",
+  "emergencyContactEmail": "sara@example.com",
+  "policyNumber": "POL-001",
+  "insuranceType": "HEALTH",
+  "providerName": "CNSS",
+  "coverageAmount": 150000.0,
+  "policyStartDate": "2026-01-01",
+  "policyEndDate": "2026-12-31",
+  "premiumAmount": 1200.0,
+  "beneficiaryName": "Sara Bennani",
+  "beneficiaryRelationship": "SISTER",
+  "beneficiaryPhone": "0666666666",
+  "beneficiaryEmail": "sara@example.com",
+  "departmentId": 1,
+  "designationId": "DES-001",
+  "reportingManagerId": null,
+  "joiningDate": "2026-05-01",
+  "grade": "G5"
+}
+
+### Onboard employee - missing token (expected 401)
+POST {{gateway}}/api/v1/employees/onboard
+Content-Type: {{json}}
+
+{
+  "firstName": "NoAuth",
+  "lastName": "User",
+  "email": "noauth@example.com",
+  "departmentId": 1,
+  "designationId": "DES-001",
+  "joiningDate": "2026-05-01",
+  "grade": "G1"
+}
+
+@employeeId = REPLACE_WITH_EMPLOYEE_ID
+@managerId = REPLACE_WITH_MANAGER_EMPLOYEE_ID
+
+### Get employee by ID
+GET {{gateway}}/api/v1/employees/{{employeeId}}
+Authorization: Bearer {{accessToken}}
+
+### Get active employees
+GET {{gateway}}/api/v1/employees/active
+Authorization: Bearer {{accessToken}}
+
+### Get employees by department
+GET {{gateway}}/api/v1/employees/department/1
+Authorization: Bearer {{accessToken}}
+
+### Get direct reports by manager
+GET {{gateway}}/api/v1/employees/manager/{{managerId}}/direct-reports
+Authorization: Bearer {{accessToken}}
+
+### Promote employee
+POST {{gateway}}/api/v1/employees/promote
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "employeeId": "{{employeeId}}",
+  "newDesignationId": "DES-002",
+  "newGrade": "G6",
+  "effectiveDate": "2026-06-01",
+  "reason": "Performance promotion",
+  "triggerSalaryRevision": true
+}
+
+### Transfer employee
+POST {{gateway}}/api/v1/employees/transfer
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "employeeId": "{{employeeId}}",
+  "newDepartmentId": 2,
+  "newDesignationId": "DES-002",
+  "effectiveDate": "2026-06-15",
+  "reason": "Business needs"
+}
+
+### Terminate employee
+POST {{gateway}}/api/v1/employees/terminate
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "employeeId": "{{employeeId}}",
+  "lastWorkingDate": "2026-12-31",
+  "terminationReason": "Contract end",
+  "comments": "Handled by HR"
+}
+
+
+### ------------------------------------------------------------
+### 3) Employee Service Direct APIs (departments/designations/skills/insurance/org-chart)
+### ------------------------------------------------------------
+### NOTE: these routes are on employee-service directly (not currently gateway-proxied)
+
+### ---- Departments ----
+
+### Create department
+POST {{employeeService}}/api/v1/departments
+Content-Type: {{json}}
+
+{
+  "departmentName": "Engineering",
+  "description": "Core engineering team",
+  "parentDepartmentId": null,
+  "departmentCode": "ENG",
+  "departmentHead": null
+}
+
+### Get all departments
+GET {{employeeService}}/api/v1/departments
+
+### Get department by ID
+GET {{employeeService}}/api/v1/departments/1
+
+### Get sub-departments
+GET {{employeeService}}/api/v1/departments/1/sub-departments
+
+### Update department
+PUT {{employeeService}}/api/v1/departments/1
+Content-Type: {{json}}
+
+{
+  "departmentName": "Engineering Updated",
+  "description": "Updated description",
+  "parentDepartmentId": null,
+  "departmentCode": "ENG",
+  "departmentHead": null
+}
+
+### Delete department (archive)
+DELETE {{employeeService}}/api/v1/departments/1
+
+
+### ---- Designations ----
+
+### Create designation
+POST {{employeeService}}/api/v1/designations
+Content-Type: {{json}}
+
+{
+  "designationName": "Software Engineer",
+  "description": "Builds product features",
+  "designationCode": "DES-001",
+  "hierarchyLevel": 3,
+  "reportingDesignation": "Engineering Manager"
+}
+
+### Get all designations
+GET {{employeeService}}/api/v1/designations
+
+### Get designation by ID
+GET {{employeeService}}/api/v1/designations/DES-001
+
+### Update designation
+PUT {{employeeService}}/api/v1/designations/DES-001
+Content-Type: {{json}}
+
+{
+  "designationName": "Senior Software Engineer",
+  "description": "Builds and reviews product features",
+  "designationCode": "DES-001",
+  "hierarchyLevel": 4,
+  "reportingDesignation": "Engineering Manager"
+}
+
+### Delete designation (deprecate)
+DELETE {{employeeService}}/api/v1/designations/DES-001
+
+
+### ---- Skills ----
+
+### Add skill
+POST {{employeeService}}/api/v1/skills
+Content-Type: {{json}}
+
+{
+  "employeeId": "{{employeeId}}",
+  "skillName": "Java",
+  "competencyLevel": "INTERMEDIATE",
+  "certification": "Oracle OCP"
+}
+
+@skillId = REPLACE_WITH_SKILL_ID
+
+### Get employee skills
+GET {{employeeService}}/api/v1/skills/employee/{{employeeId}}
+
+### Search employees by skill
+GET {{employeeService}}/api/v1/skills/search/Java
+
+### Update skill
+PUT {{employeeService}}/api/v1/skills/{{skillId}}
+Content-Type: {{json}}
+
+{
+  "employeeId": "{{employeeId}}",
+  "skillName": "Java",
+  "competencyLevel": "ADVANCED",
+  "certification": "Oracle OCP"
+}
+
+### Remove skill
+DELETE {{employeeService}}/api/v1/skills/{{skillId}}
+
+
+### ---- Insurance ----
+
+### Add insurance
+POST {{employeeService}}/api/employees/insurances
+Content-Type: {{json}}
+
+{
+  "employeeId": "{{employeeId}}",
+  "policyNumber": "POL-2026-001",
+  "insuranceType": "HEALTH",
+  "providerName": "CNSS",
+  "coverageAmount": 100000.0,
+  "policyStartDate": "2026-01-01",
+  "policyEndDate": "2026-12-31",
+  "premiumAmount": 1200.0,
+  "beneficiaryName": "Sara Bennani",
+  "beneficiaryRelationship": "SISTER",
+  "beneficiaryPhone": "0666666666",
+  "beneficiaryEmail": "sara@example.com"
+}
+
+@insuranceId = REPLACE_WITH_INSURANCE_ID
+
+### Get all insurances for employee
+GET {{employeeService}}/api/employees/insurances/employee/{{employeeId}}
+
+### Get active insurances
+GET {{employeeService}}/api/employees/insurances/employee/{{employeeId}}/active
+
+### Get insurances by type
+GET {{employeeService}}/api/employees/insurances/employee/{{employeeId}}/type/HEALTH
+
+### Get by policy number
+GET {{employeeService}}/api/employees/insurances/policy/POL-2026-001
+
+### Update insurance status
+PUT {{employeeService}}/api/employees/insurances/{{insuranceId}}/status?status=INACTIVE
+
+### File claim
+POST {{employeeService}}/api/employees/insurances/{{insuranceId}}/claim?claimAmount=2500&claimDetails=Hospital+visit
+
+### Delete insurance
+DELETE {{employeeService}}/api/employees/insurances/{{insuranceId}}
+
+
+### ---- Organization Chart ----
+
+### Manager hierarchy
+GET {{employeeService}}/api/v1/organization-chart/manager/{{managerId}}
+
+### Department hierarchy
+GET {{employeeService}}/api/v1/organization-chart/department/1
+
+### Employee hierarchy
+GET {{employeeService}}/api/v1/organization-chart/employee/{{employeeId}}

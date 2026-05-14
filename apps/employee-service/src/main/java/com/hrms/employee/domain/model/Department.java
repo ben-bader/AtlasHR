@@ -18,7 +18,8 @@ import com.hrms.employee.common.enums.DepartmentStatus;
 public class Department {
 
     @Id
-    private Long departmentId;
+    @Column(name = "department_id")
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String departmentName;
