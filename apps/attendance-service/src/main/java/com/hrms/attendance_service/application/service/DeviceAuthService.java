@@ -2,8 +2,12 @@ package com.hrms.attendance_service.application.service;
 
 import com.hrms.attendance_service.domain.model.Device;
 import com.hrms.attendance_service.domain.repository.DeviceRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -13,12 +17,16 @@ public class DeviceAuthService {
 
     public Device validateDeviceKey(String apiKey) {
 
-        return deviceRepository.findByApiKeyAndActiveTrue(apiKey)
-                .orElseThrow(() -> new RuntimeException("Invalid device API key"));
+        return deviceRepository
+                .findByApiKeyAndActiveTrue(apiKey)
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid or inactive device API key"));
     }
 
     public void updateLastSeen(Device device) {
-        device.setLastSeen(java.time.LocalDateTime.now());
+
+        device.setLastSeen(LocalDateTime.now());
+
         deviceRepository.save(device);
     }
 }

@@ -13,7 +13,5 @@ public class CheckInRequestDTO {
 
     @NotNull
     private VerificationMethod method;
-
-    @NotNull
-    private VerificationPayloadDTO verificationPayload;
+    
 }

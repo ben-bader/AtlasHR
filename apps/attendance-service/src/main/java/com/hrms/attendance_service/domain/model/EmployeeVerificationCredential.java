@@ -14,13 +14,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class EmployeeVerificationCredential extends BaseEntity {
 
+    @Column(nullable = false, unique = true)
     private String employeeId;
 
-    // QR (daily token)
+    // QR
+    @Column(unique = true)
     private String qrToken;
+
     private LocalDate qrExpiryDate;
 
     // NFC
+    @Column(unique = true)
     private String nfcTag;
 
     // FACE
@@ -29,5 +33,6 @@ public class EmployeeVerificationCredential extends BaseEntity {
     // FINGERPRINT
     private String fingerprintId;
 
-    private Boolean active;
+    @Builder.Default
+    private Boolean active = true;
 }

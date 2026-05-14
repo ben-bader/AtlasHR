@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class DeviceAuthenticationFilter extends OncePerRequestFilter {
 
-    private final DeviceAuthService deviceService;
+    private final DeviceAuthService deviceAuthService;
 
     @Override
     protected void doFilterInternal(
@@ -30,8 +31,9 @@ public class DeviceAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // only protect attendance endpoints
-        if (!path.startsWith("/api/attendance")) {
+        // Protect device attendance endpoints
+        if (!path.startsWith("/api/device-attendance")) {
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -39,21 +41,29 @@ public class DeviceAuthenticationFilter extends OncePerRequestFilter {
         String apiKey = request.getHeader("X-Device-Key");
 
         if (apiKey == null || apiKey.isBlank()) {
+
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
             response.getWriter().write("Missing Device API Key");
+
             return;
         }
 
         try {
-            Device device = deviceService.validateDevice(apiKey);
-            deviceService.updateLastSeen(device);
 
-            // you can attach device to request
+            Device device =
+                    deviceAuthService.validateDeviceKey(apiKey);
+
+            deviceAuthService.updateLastSeen(device);
+
             request.setAttribute("device", device);
 
         } catch (Exception e) {
+
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
             response.getWriter().write("Invalid Device API Key");
+
             return;
         }
 
