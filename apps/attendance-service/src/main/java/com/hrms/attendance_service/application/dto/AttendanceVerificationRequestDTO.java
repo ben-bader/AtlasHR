@@ -1,9 +1,15 @@
 package com.hrms.attendance_service.application.dto;
 
+import com.hrms.attendance_service.common.enums.VerificationMethod;
+
 import lombok.Data;
 
 @Data
-public class VerificationPayloadDTO {
+public class AttendanceVerificationRequestDTO {
+
+    private String employeeId;
+
+    private VerificationMethod method;
 
     // QR
     private String qrCode;
@@ -17,6 +23,5 @@ public class VerificationPayloadDTO {
     // FINGERPRINT
     private Boolean fingerprintMatched;
 
-    // Device security
-    private String deviceId;
+    private String deviceUid;
 }

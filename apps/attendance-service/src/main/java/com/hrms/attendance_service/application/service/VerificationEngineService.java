@@ -1,9 +1,7 @@
 package com.hrms.attendance_service.application.service;
 
-import com.hrms.attendance_service.application.dto.VerificationPayloadDTO;
-import com.hrms.attendance_service.common.enums.VerificationMethod;
-import com.hrms.attendance_service.common.exceptions.ValidationException;
-
+import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
+import com.hrms.attendance_service.common.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,82 +9,51 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class VerificationEngineService {
 
-    public void validate(VerificationMethod method,
-                         VerificationPayloadDTO payload) {
+    private final QrTokenService qrTokenService;
 
-        switch (method) {
+    public void verify(AttendanceVerificationRequestDTO request) {
 
-            case QR_CODE -> validateQRCode(payload);
+        switch (request.getMethod()) {
 
-            case NFC -> validateNFC(payload);
+            case QR_CODE -> verifyQr(request);
+            case NFC -> verifyNfc(request);
+            case FACE_RECOGNITION -> verifyFace(request);
+            case FINGERPRINT -> verifyFingerprint(request);
 
-            case FACE_RECOGNITION -> validateFace(payload);
-
-            case FINGERPRINT -> validateFingerprint(payload);
-
-            default -> throw new ValidationException(
-                    "Unsupported verification method"
-            );
+            default -> throw new BadRequestException("Unsupported method");
         }
     }
 
-    // ================= QR =================
-    private void validateQRCode(VerificationPayloadDTO payload) {
+    private void verifyQr(AttendanceVerificationRequestDTO request) {
 
-        if (payload == null ||
-                payload.getQrCode() == null ||
-                payload.getQrCode().isBlank()) {
+        if (request.getQrCode() == null)
+            throw new BadRequestException("QR required");
 
-            throw new ValidationException(
-                    "Invalid QR Code"
-            );
+        if (!qrTokenService.validateQr(request.getQrCode()))
+            throw new BadRequestException("QR expired/invalid");
+    }
+
+    private void verifyNfc(AttendanceVerificationRequestDTO request) {
+
+        if (request.getNfcTag() == null)
+            throw new BadRequestException("NFC required");
+    }
+
+    private void verifyFace(AttendanceVerificationRequestDTO request) {
+
+        if (request.getFaceMatchScore() == null ||
+                request.getFaceMatchScore() < 0.85) {
+
+            throw new BadRequestException("Face failed");
         }
     }
 
-    // ================= NFC =================
-    private void validateNFC(VerificationPayloadDTO payload) {
+    private void verifyFingerprint(AttendanceVerificationRequestDTO request) {
 
-        if (payload == null ||
-                payload.getNfcTag() == null ||
-                payload.getNfcTag().isBlank()) {
+        if (request.getFingerprintMatched() == null ||
+                !request.getFingerprintMatched()) {
 
-            throw new ValidationException(
-                    "Invalid NFC Tag"
-            );
-        }
-    }
-
-    // ================= FACE =================
-    private void validateFace(VerificationPayloadDTO payload) {
-
-        if (payload == null ||
-                payload.getFaceMatchScore() == null) {
-
-            throw new ValidationException(
-                    "Face verification failed"
-            );
-        }
-
-        double threshold = 0.85;
-
-        if (payload.getFaceMatchScore() < threshold) {
-
-            throw new ValidationException(
-                    "Face match score too low"
-            );
-        }
-    }
-
-    // ================= FINGERPRINT =================
-    private void validateFingerprint(VerificationPayloadDTO payload) {
-
-        if (payload == null ||
-                payload.getFingerprintMatched() == null ||
-                !payload.getFingerprintMatched()) {
-
-            throw new ValidationException(
-                    "Fingerprint verification failed"
-            );
+            throw new BadRequestException("Fingerprint failed");
         }
     }
 }
