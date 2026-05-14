@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "attendance-service.fullname" . }}-config
+  namespace: hrms
+  labels:
+    {{- include "attendance-service.labels" . | nindent 4 }}
+
+data:
+  database-url: {{ .Values.config.databaseUrl | quote }}
+  rabbitmq-host: {{ .Values.config.rabbitmqHost | quote }}
+  rabbitmq-port: {{ .Values.config.rabbitmqPort | quote }}
