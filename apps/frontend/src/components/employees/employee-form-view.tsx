@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -47,6 +47,7 @@ function toPayload(data: EmployeeCreateFormValues): CreateEmployeeRequest {
 export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
   const router = useRouter()
   const isEditMode = !!employeeId
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { employee: existingEmployee, isLoading: isLoadingEmployee } = useEmployee(employeeId)
 
@@ -65,7 +66,7 @@ export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
   const { updateEmployee, isLoading: isUpdating, error: updateError, setError: setUpdateError } =
     useUpdateEmployee(employeeId || "")
 
-  const isLoading = isCreating || isUpdating || (isEditMode && isLoadingEmployee)
+  const isLoading = isCreating || isUpdating || (isEditMode && isLoadingEmployee) || isSubmitting
   const error = createError || updateError
 
   const {
@@ -102,24 +103,27 @@ export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
   const onSubmit = async (data: EmployeeCreateFormValues) => {
     setCreateError(null)
     setUpdateError(null)
+    setIsSubmitting(true)
 
     try {
       const payload = toPayload(data)
-      if (isEditMode && employeeId) {
-        updateEmployee(payload)
+      const promise = isEditMode && employeeId 
+        ? updateEmployee(payload)
+        : createEmployee(payload)
+      
+      // Wait for mutation to complete
+      await promise
+      
+      // Navigate after mutation succeeds
+      if (onSuccess) {
+        onSuccess()
       } else {
-        createEmployee(payload)
+        router.push("/dashboard/employees")
       }
-
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess()
-        } else {
-          router.push("/dashboard/employees")
-        }
-      }, 500)
     } catch (err) {
       console.error("Failed to save employee:", err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 

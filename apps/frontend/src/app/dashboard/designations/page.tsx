@@ -1,6 +1,7 @@
 "use client"
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
+import { ErrorBoundary } from "@/components/error-boundary"
 import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell"
 import { DesignationsAdminView } from "@/components/hr/designations-admin-view"
 
@@ -16,7 +17,9 @@ export default function DesignationsPage() {
           { label: "Designations" },
         ]}
       >
-        <DesignationsAdminView />
+        <ErrorBoundary>
+          <DesignationsAdminView />
+        </ErrorBoundary>
       </DashboardPageShell>
     </div>
   )
