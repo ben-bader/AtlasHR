@@ -21,7 +21,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       GATEWAY_ENABLED: "true"
     ports:
-      - "8085:8085"
+      - "8086:8086"
     networks:
       - hrms-network
     restart: unless-stopped
