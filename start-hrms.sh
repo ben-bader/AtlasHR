@@ -47,6 +47,7 @@
   declare -A SERVICES
   SERVICES=(
     [auth-service]="$SCRIPT_DIR/apps/auth-service/docker-compose.yml"
+    [attendance-service]="$SCRIPT_DIR/apps/attendance-service/docker-compose.yml"
     [employee-service]="$SCRIPT_DIR/apps/employee-service/docker-compose.yml"
     [api-gateway]="$SCRIPT_DIR/apps/gateway-service/docker-compose.yml"
     [frontend]="$SCRIPT_DIR/apps/frontend/docker-compose.yml"
@@ -54,6 +55,7 @@
 
   # Start order matters -- auth before gateway, gateway before frontend
   SERVICE_ORDER=(
+    attendance-service
     auth-service
     employee-service
     api-gateway
