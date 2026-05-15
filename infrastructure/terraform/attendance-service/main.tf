@@ -132,7 +132,7 @@ resource "kubernetes_network_policy" "attendance_service_netpol" {
 
       ports {
         protocol = "TCP"
-        port     = "8082"
+        port     = "8085"
       }
     }
 
