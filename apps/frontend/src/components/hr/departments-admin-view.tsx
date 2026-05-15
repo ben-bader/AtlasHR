@@ -20,9 +20,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 import { departmentAPI } from "@/lib/api/department"
 import type { CreateDepartmentPayload, Department } from "@/lib/types"
-import { Loader2, Pencil, Trash2 } from "lucide-react"
+import { Loader2, Pencil, Trash2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { FormLabel } from "@/components/ui/form"
 
 const emptyForm: CreateDepartmentPayload = {
@@ -35,8 +40,11 @@ const emptyForm: CreateDepartmentPayload = {
 export function DepartmentsAdminView() {
   const qc = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: number; name: string } | null>(null)
   const [editing, setEditing] = useState<Department | null>(null)
   const [form, setForm] = useState<CreateDepartmentPayload>(emptyForm)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["departments"],
@@ -47,8 +55,13 @@ export function DepartmentsAdminView() {
     mutationFn: () => departmentAPI.create(form),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["departments"] })
+      setSuccessMessage("Department created successfully")
       setDialogOpen(false)
       setForm(emptyForm)
+      setTimeout(() => setSuccessMessage(null), 3000)
+    },
+    onError: (error) => {
+      console.error("Failed to create department:", error)
     },
   })
 
@@ -57,15 +70,27 @@ export function DepartmentsAdminView() {
       editing ? departmentAPI.update(editing.departmentId, form) : Promise.reject(),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["departments"] })
+      setSuccessMessage("Department updated successfully")
       setDialogOpen(false)
       setEditing(null)
       setForm(emptyForm)
+      setTimeout(() => setSuccessMessage(null), 3000)
+    },
+    onError: (error) => {
+      console.error("Failed to update department:", error)
     },
   })
 
   const deleteMut = useMutation({
     mutationFn: (id: number) => departmentAPI.delete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["departments"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["departments"] })
+      setSuccessMessage("Department deleted successfully")
+      setTimeout(() => setSuccessMessage(null), 3000)
+    },
+    onError: (error) => {
+      console.error("Failed to delete department:", error)
+    },
   })
 
   const openCreate = () => {
@@ -102,6 +127,13 @@ export function DepartmentsAdminView() {
 
   return (
     <div className="space-y-4">
+      {successMessage && (
+        <Alert className="border-green-600 bg-green-50">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-900">Success</AlertTitle>
+          <AlertDescription className="text-green-800">{successMessage}</AlertDescription>
+        </Alert>
+      )}
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">GET /departments · POST /departments · PUT /departments/:id</p>
         <Button onClick={openCreate}>Add department</Button>
@@ -142,7 +174,8 @@ export function DepartmentsAdminView() {
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        if (confirm(`Delete department ${d.departmentName}?`)) deleteMut.mutate(d.departmentId)
+                        setDeleteConfirm({ id: d.departmentId, name: d.departmentName })
+                        setDeleteConfirmOpen(true)
                       }}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -161,6 +194,17 @@ export function DepartmentsAdminView() {
             <DialogTitle>{editing ? "Edit department" : "Create department"}</DialogTitle>
             <DialogDescription>Maps to employee-service DepartmentController.</DialogDescription>
           </DialogHeader>
+          {(createMut.isError || updateMut.isError) && (
+            <Alert className="border-red-600 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-900">Error</AlertTitle>
+              <AlertDescription className="text-red-800">
+                {createMut.error instanceof Error ? createMut.error.message : 
+                 updateMut.error instanceof Error ? updateMut.error.message :
+                 `Failed to ${editing ? "update" : "create"} department. Please try again.`}
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-3 py-2">
             <div className="grid gap-1">
               <FormLabel>Name *</FormLabel>
@@ -198,6 +242,41 @@ export function DepartmentsAdminView() {
             </Button>
             <Button onClick={submit} disabled={createMut.isPending || updateMut.isPending}>
               {editing ? "Save" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete department</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <p className="text-sm text-foreground">
+              Are you sure you want to delete <span className="font-semibold">{deleteConfirm?.name}</span>?
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMut.isPending}
+              onClick={() => {
+                if (deleteConfirm) {
+                  deleteMut.mutate(deleteConfirm.id, {
+                    onSuccess: () => {
+                      setDeleteConfirmOpen(false)
+                      setDeleteConfirm(null)
+                    },
+                  })
+                }
+              }}
+            >
+              Delete
             </Button>
           </DialogFooter>
         </DialogContent>

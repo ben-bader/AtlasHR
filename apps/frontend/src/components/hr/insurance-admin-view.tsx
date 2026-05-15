@@ -20,9 +20,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 import { insuranceAPI } from "@/lib/api/insurance"
 import type { AddInsurancePayload } from "@/lib/types"
-import { Loader2 } from "lucide-react"
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { FormLabel } from "@/components/ui/form"
 
 const empty: AddInsurancePayload = {
@@ -37,6 +42,7 @@ export function InsuranceAdminView() {
   const [employeeId, setEmployeeId] = useState("")
   const [runId, setRunId] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [form, setForm] = useState<AddInsurancePayload>(empty)
 
   const listQuery = useQuery({
@@ -49,9 +55,15 @@ export function InsuranceAdminView() {
     mutationFn: (payload: AddInsurancePayload) => insuranceAPI.add(payload),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ["insurances-employee"] })
+      setSuccessMessage("Insurance policy added successfully")
       setDialogOpen(false)
       setForm(empty)
       if (variables.employeeId.trim()) setRunId(variables.employeeId.trim())
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000)
+    },
+    onError: (error) => {
+      console.error("Failed to add insurance policy:", error)
     },
   })
 
@@ -59,8 +71,32 @@ export function InsuranceAdminView() {
 
   const rows = listQuery.data ?? []
 
+  // Helper function to validate date format
+  const isValidDateFormat = (dateString: string): boolean => {
+    if (!dateString) return true // Optional field
+    const regex = /^\d{4}-\d{2}-\d{2}$/
+    return regex.test(dateString)
+  }
+
+  // Helper function to validate date range
+  const isValidDateRange = (): boolean => {
+    const { policyStartDate, policyEndDate } = form
+    if (!policyStartDate || !policyEndDate) return true
+    if (!isValidDateFormat(policyStartDate) || !isValidDateFormat(policyEndDate)) return false
+    return new Date(policyStartDate) < new Date(policyEndDate)
+  }
+
+  const isDateValid = isValidDateRange()
+
   return (
     <div className="space-y-6">
+      {successMessage && (
+        <Alert className="border-green-600 bg-green-50">
+          <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <AlertTitle className="text-green-900">Success</AlertTitle>
+          <AlertDescription className="text-green-800">{successMessage}</AlertDescription>
+        </Alert>
+      )}
       <p className="text-sm text-muted-foreground">
         EmployeeInsuranceController — policies under /employees/insurances (proxied via gateway).
       </p>
@@ -131,6 +167,15 @@ export function InsuranceAdminView() {
             <DialogTitle>Add insurance</DialogTitle>
             <DialogDescription>POST /employees/insurances · dates as YYYY-MM-DD</DialogDescription>
           </DialogHeader>
+          {addMut.isError && (
+            <Alert className="border-red-600 bg-red-50">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-900">Error</AlertTitle>
+              <AlertDescription className="text-red-800">
+                {addMut.error instanceof Error ? addMut.error.message : "Failed to add insurance policy. Please try again."}
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-2 py-2">
             <FormLabel>Employee ID *</FormLabel>
             <Input value={form.employeeId} onChange={(e) => setForm((f) => ({ ...f, employeeId: e.target.value }))} />
@@ -152,6 +197,9 @@ export function InsuranceAdminView() {
             <Input type="date" value={form.policyStartDate ?? ""} onChange={(e) => setForm((f) => ({ ...f, policyStartDate: e.target.value }))} />
             <FormLabel>End date</FormLabel>
             <Input type="date" value={form.policyEndDate ?? ""} onChange={(e) => setForm((f) => ({ ...f, policyEndDate: e.target.value }))} />
+            {form.policyStartDate && form.policyEndDate && !isDateValid && (
+              <p className="text-xs text-red-600 -mt-1">Start date must be before end date</p>
+            )}
             <FormLabel>Premium</FormLabel>
             <Input
               type="number"
@@ -167,7 +215,7 @@ export function InsuranceAdminView() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button disabled={!form.employeeId.trim() || addMut.isPending} onClick={() => addMut.mutate(form)}>
+            <Button disabled={!form.employeeId.trim() || addMut.isPending || !isDateValid} onClick={() => addMut.mutate(form)}>
               Create
             </Button>
           </DialogFooter>

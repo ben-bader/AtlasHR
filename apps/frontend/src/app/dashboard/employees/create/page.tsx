@@ -1,6 +1,7 @@
 "use client"
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
+import { ErrorBoundary } from "@/components/error-boundary"
 import { EmployeeFormView } from "@/components/employees/employee-form-view"
 import {
   Breadcrumb,
@@ -47,7 +48,9 @@ export default function CreateEmployeePage() {
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <EmployeeFormView />
+        <ErrorBoundary>
+          <EmployeeFormView />
+        </ErrorBoundary>
       </div>
     </div>
   )

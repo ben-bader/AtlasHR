@@ -66,7 +66,7 @@ export function useCreateEmployee() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: (data: CreateEmployeeRequest) =>
       employeeAPI.createEmployee(data),
     onSuccess: () => {
@@ -81,7 +81,7 @@ export function useCreateEmployee() {
   })
 
   return {
-    createEmployee: mutate,
+    createEmployee: mutateAsync,
     isLoading: isPending,
     error,
     setError,
@@ -92,7 +92,7 @@ export function useUpdateEmployee(id: string) {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
 
-  const { mutate, isPending } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: (data: UpdateEmployeeRequest) =>
       employeeAPI.updateEmployee(id, data),
     onSuccess: () => {
@@ -108,7 +108,7 @@ export function useUpdateEmployee(id: string) {
   })
 
   return {
-    updateEmployee: mutate,
+    updateEmployee: mutateAsync,
     isLoading: isPending,
     error,
     setError,
