@@ -1,7 +1,6 @@
 "use client"
 
 import { LoginForm } from "@/components/login-form"
-import { GalleryVerticalEndIcon } from "lucide-react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store/auth"
@@ -33,10 +32,12 @@ export default function LoginPage() {
         </div>
       </div>
       <div className="relative hidden bg-muted lg:block">
-        <img
+        <Image
           src="/placeholder.svg"
-          alt="Image"
+          alt="Illustration"
+          fill
           className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          sizes="100vw"
         />
       </div>
     </div>

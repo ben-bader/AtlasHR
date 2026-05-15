@@ -16,10 +16,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +45,8 @@ public class JwtTokenProvider {
     public String generateToken(UserDetails userDetails) {
         // If UserDetails is a User entity, extract the userId
         String userId = null;
-        if (userDetails instanceof com.hrms.auth.domain.model.User user) {
+        if (userDetails instanceof com.hrms.auth.domain.model.User) {
+            com.hrms.auth.domain.model.User user = (com.hrms.auth.domain.model.User) userDetails;
             userId = user.getId() != null ? user.getId().toString() : null;
         }
         return generateToken(userDetails.getUsername(), extractRoles(userDetails), userId);
@@ -83,7 +80,7 @@ public class JwtTokenProvider {
         builder.claim("roles", roles)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256);
+                .signWith(getSigningKey());
         
         return builder.compact();
     }
@@ -102,7 +99,7 @@ public class JwtTokenProvider {
                 .claim("type", "refresh")
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -115,21 +112,15 @@ public class JwtTokenProvider {
         try {
             SecretKey key = getSigningKey();
             return Jwts.parser()
-                    .setSigningKey(key)
+                    .verifyWith(key)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
             log.warn("JWT token is expired: {}", e.getMessage());
             throw e;
-        } catch (UnsupportedJwtException e) {
-            log.warn("Unsupported JWT token: {}", e.getMessage());
-            throw e;
-        } catch (MalformedJwtException e) {
-            log.warn("Malformed JWT token: {}", e.getMessage());
-            throw e;
-        } catch (SignatureException e) {
-            log.warn("Invalid JWT signature: {}", e.getMessage());
+        } catch (JwtException e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
             throw e;
         } catch (IllegalArgumentException e) {
             log.warn("JWT claims string is empty: {}", e.getMessage());
@@ -141,7 +132,7 @@ public class JwtTokenProvider {
         try {
             SecretKey key = getSigningKey();
             Jwts.parser()
-                    .setSigningKey(key)
+                    .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
             return true;

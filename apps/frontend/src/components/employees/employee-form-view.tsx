@@ -106,18 +106,16 @@ export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
     try {
       const payload = toPayload(data)
       if (isEditMode && employeeId) {
-        updateEmployee(payload)
+        await updateEmployee(payload)
       } else {
-        createEmployee(payload)
+        await createEmployee(payload)
       }
 
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess()
-        } else {
-          router.push("/dashboard/employees")
-        }
-      }, 500)
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push("/dashboard/employees")
+      }
     } catch (err) {
       console.error("Failed to save employee:", err)
     }

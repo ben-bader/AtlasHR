@@ -39,7 +39,7 @@ public class JwtUtil {
 		try {
 			SecretKey key = getSigningKey();
 			return Jwts.parser()
-				.setSigningKey(key)
+				.verifyWith(key)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();

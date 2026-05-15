@@ -1,7 +1,9 @@
 "use client";
 
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useAuthStore } from "@/lib/store/auth";
+import { getAccessToken } from "@/lib/utils/token";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,9 +14,23 @@ const queryClient = new QueryClient({
   },
 });
 
+function AuthHydrator() {
+  const { isAuthenticated, fetchCurrentUser } = useAuthStore();
+
+  useEffect(() => {
+    const token = getAccessToken();
+    if (token && !isAuthenticated) {
+      fetchCurrentUser();
+    }
+  }, [isAuthenticated, fetchCurrentUser]);
+
+  return null;
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
+      <AuthHydrator />
       {children}
     </QueryClientProvider>
   );

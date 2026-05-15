@@ -45,7 +45,7 @@ public class DeviceAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            Device device = deviceService.validateDevice(apiKey);
+            Device device = deviceService.validateDeviceKey(apiKey);
             deviceService.updateLastSeen(device);
 
             // you can attach device to request

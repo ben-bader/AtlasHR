@@ -23,6 +23,7 @@ public class DailyAttendance extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "daily_attendance_id")
+    @Builder.Default
     private List<Attendance> attendances = new ArrayList<>();
 
     private Integer totalPresent;

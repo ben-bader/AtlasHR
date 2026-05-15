@@ -214,6 +214,33 @@ export interface AddInsurancePayload {
   beneficiaryEmail?: string;
 }
 
+export interface Attendance {
+  id: number;
+  employeeId?: string;
+  date?: string;
+  checkIn?: string;
+  checkOut?: string;
+  status?: string;
+  shiftId?: number;
+  shiftName?: string;
+  method?: string;
+  workedHours?: number;
+  isLate?: boolean;
+  lateMinutes?: number;
+  isOvertime?: boolean;
+  overtimeMinutes?: number;
+}
+
+export interface DailyAttendance {
+  id: number;
+  date?: string;
+  totalPresent?: number;
+  totalAbsent?: number;
+  totalLate?: number;
+  totalOnLeave?: number;
+  attendances?: Attendance[];
+}
+
 export type UpdateEmployeeRequest = Partial<CreateEmployeeRequest>
 
 export interface EmployeeListResponse {

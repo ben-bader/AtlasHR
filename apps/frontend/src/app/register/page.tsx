@@ -1,11 +1,12 @@
 "use client"
 
+import Link from "next/link"
+import Image from "next/image"
 import { RegisterForm } from "@/components/register-form"
 import { GalleryVerticalEndIcon } from "lucide-react"
-import { Suspense, useEffect } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store/auth"
-import Image from "next/image"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -19,22 +20,30 @@ export default function RegisterPage() {
   }, [isAuthenticated, router])
 
   return (
-    <div className="flex h-svh flex-col  justify-center items-center">
-      <div className="flex flex-col gap-4 p-6 md:p-10 w-full">
+    <div className="grid min-h-svh lg:grid-cols-2">
+      <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex items-center justify-center">
-                  <Image src={"/logo.png"} alt="AtlasHR" width={200} height={200} className="-my-10" />
+          <Link href="/" className="flex items-center gap-2 font-medium">
+            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <GalleryVerticalEndIcon className="size-4" />
             </div>
-          </a>
+            AtlasHR
+          </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-2xl ">
-            <Suspense fallback={<div className="text-sm text-muted-foreground">Loading...</div>}>
-              <RegisterForm />
-            </Suspense>
+          <div className="w-full max-w-xs">
+            <RegisterForm />
           </div>
         </div>
+      </div>
+      <div className="relative hidden bg-muted lg:block">
+        <Image
+          src="/placeholder.svg"
+          alt="Illustration"
+          fill
+          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          sizes="100vw"
+        />
       </div>
     </div>
   )
