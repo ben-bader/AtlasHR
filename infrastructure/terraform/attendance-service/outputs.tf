@@ -15,5 +15,5 @@ output "helm_release_status" {
 
 output "service_endpoint" {
   description = "Attendance Service endpoint"
-  value       = "http://attendance-service.hrms.svc.cluster.local:8082"
+  value       = "http://attendance-service.hrms.svc.cluster.local:8085"
 }

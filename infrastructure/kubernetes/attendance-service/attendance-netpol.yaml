@@ -23,7 +23,7 @@ spec:
               app: api-gateway
       ports:
         - protocol: TCP
-          port: 8082
+          port: 8085
 
   egress:
     - to:
@@ -44,4 +44,3 @@ spec:
         - protocol: UDP
           port: 53
 
-          
