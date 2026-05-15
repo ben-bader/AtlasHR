@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/app/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -19,16 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/app/components/ui/dialog"
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert"
+} from "@/app/components/ui/alert"
 import { designationAPI } from "@/lib/api/designation"
 import type { CreateDesignationPayload, Designation } from "@/lib/types"
 import { Loader2, Pencil, Trash2, AlertCircle, CheckCircle2 } from "lucide-react"
-import { FormLabel } from "@/components/ui/form"
+import { FormLabel } from "@/app/components/ui/form"
 
 const emptyForm: CreateDesignationPayload = {
   designationName: "",

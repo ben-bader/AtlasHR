@@ -59,7 +59,7 @@
     # attendance-service
     auth-service
     employee-service
-    #performance-service
+   # performance-service
     api-gateway
     frontend
   )

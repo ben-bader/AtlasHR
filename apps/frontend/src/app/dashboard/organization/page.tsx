@@ -1,9 +1,9 @@
 "use client"
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
-import { ErrorBoundary } from "@/components/error-boundary"
-import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell"
-import { OrganizationChartView } from "@/components/hr/organization-chart-view"
+import { ErrorBoundary } from "@/app/components/error-boundary"
+import { DashboardPageShell } from "@/app/components/dashboard/dashboard-page-shell"
+import { OrganizationChartView } from "@/app/components/hr/organization-chart-view"
 
 export default function OrganizationPage() {
   useProtectedRoute()

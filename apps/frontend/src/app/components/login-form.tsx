@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+} from "@/app/components/ui/field";
+import { Input } from "@/app/components/ui/input";
 import { loginSchema, type LoginFormValues } from "@/lib/validators/auth";
 import { useAuth } from "@/hooks/useAuth";
 

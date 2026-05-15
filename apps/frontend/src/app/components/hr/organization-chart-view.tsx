@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/app/components/ui/button"
+import { Input } from "@/app/components/ui/input"
 import {
   Table,
   TableBody,
@@ -11,11 +11,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/app/components/ui/table"
 import { organizationChartAPI } from "@/lib/api/organizationChart"
 import type { OrgChartNode } from "@/lib/types"
 import { Loader2 } from "lucide-react"
-import { FormLabel } from "@/components/ui/form"
+import { FormLabel } from "@/app/components/ui/form"
 
 function empLabel(e?: { firstName?: string; lastName?: string; id?: string } | null) {
   if (!e) return "—"

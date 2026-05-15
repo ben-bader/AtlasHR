@@ -1,9 +1,9 @@
 "use client"
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
-import { ErrorBoundary } from "@/components/error-boundary"
-import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell"
-import { SkillsAdminView } from "@/components/hr/skills-admin-view"
+import { ErrorBoundary } from "@/app/components/error-boundary"
+import { DashboardPageShell } from "@/app/components/dashboard/dashboard-page-shell"
+import { SkillsAdminView } from "@/app/components/hr/skills-admin-view"
 
 export default function SkillsPage() {
   useProtectedRoute()

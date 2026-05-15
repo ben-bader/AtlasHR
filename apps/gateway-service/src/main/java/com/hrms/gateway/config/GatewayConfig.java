@@ -53,8 +53,8 @@ public class GatewayConfig {
 					"/api/departments/**",
 					"/api/designations/**",
 					"/api/organization-chart/**",
-				"/api/employees/insurances/**",
-				"/api/skills/**"
+				    "/api/employees/insurances/**",
+				    "/api/skills/**"
 			)
 			.uri("http://hrms-employee-service:8083"))
 		.build();

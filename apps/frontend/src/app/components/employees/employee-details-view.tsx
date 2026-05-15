@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/app/components/ui/button"
+import { Separator } from "@/app/components/ui/separator"
+import { Input } from "@/app/components/ui/input"
 import { useEmployee } from "@/hooks/useEmployee"
 import { skillsAPI } from "@/lib/api/skills"
 import { insuranceAPI } from "@/lib/api/insurance"
@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/app/components/ui/table"
 import {
   Dialog,
   DialogContent,
@@ -28,8 +28,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { FormLabel } from "@/components/ui/form"
+} from "@/app/components/ui/dialog"
+import { FormLabel } from "@/app/components/ui/form"
 import { cn } from "@/lib/utils"
 
 interface EmployeeDetailsViewProps {

@@ -9,6 +9,7 @@ CREATE DATABASE hrms_training;
 CREATE DATABASE hrms_notification;
 CREATE DATABASE hrms_reporting;
 CREATE DATABASE hrms_fleet;
+CREATE DATABASE hrms_performance;
 
 -- grant all to shared user
 GRANT ALL PRIVILEGES ON DATABASE hrms_auth TO hrms;
@@ -22,3 +23,4 @@ GRANT ALL PRIVILEGES ON DATABASE hrms_training TO hrms;
 GRANT ALL PRIVILEGES ON DATABASE hrms_notification TO hrms;
 GRANT ALL PRIVILEGES ON DATABASE hrms_reporting TO hrms;
 GRANT ALL PRIVILEGES ON DATABASE hrms_fleet TO hrms;
+GRANT ALL PRIVILEGES ON DATABASE hrms_performance TO hrms;

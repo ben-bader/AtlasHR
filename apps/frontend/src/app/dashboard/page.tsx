@@ -3,7 +3,7 @@
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
 import { useAuth } from "@/hooks/useAuth"
 import { useEmployeeList } from "@/hooks/useEmployee"
-import { ErrorBoundary } from "@/components/error-boundary"
+import { ErrorBoundary } from "@/app/components/error-boundary"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,10 +11,10 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
+} from "@/app/components/ui/breadcrumb"
+import { Separator } from "@/app/components/ui/separator"
+import { SidebarTrigger } from "@/app/components/ui/sidebar"
+import { Button } from "@/app/components/ui/button"
 import { useRouter } from "next/navigation"
 import { Users, BarChart3, Settings, Building2, BadgeCheck, Network, Award, Shield } from "lucide-react"
 

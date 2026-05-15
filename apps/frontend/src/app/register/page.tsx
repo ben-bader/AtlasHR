@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { RegisterForm } from "@/components/register-form"
+import { RegisterForm } from "@/app/components/register-form"
 import { GalleryVerticalEndIcon } from "lucide-react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"

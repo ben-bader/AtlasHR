@@ -1,7 +1,7 @@
 "use client"
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/app/components/app-sidebar"
+import { SidebarInset, SidebarProvider } from "@/app/components/ui/sidebar"
 
 export default function DashboardLayout({
   children,

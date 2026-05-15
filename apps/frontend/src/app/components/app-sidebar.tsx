@@ -2,16 +2,16 @@
 
 import * as React from "react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from "@/app/components/nav-main"
+import { NavUser } from "@/app/components/nav-user"
+import { TeamSwitcher } from "@/app/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/app/components/ui/sidebar"
 import {
   LayoutDashboard,
   Users,

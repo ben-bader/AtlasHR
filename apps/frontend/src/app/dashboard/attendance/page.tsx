@@ -1,8 +1,8 @@
 "use client"
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
-import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell"
-import { DailyAttendanceView } from "@/components/attendance/daily-attendance-view"
+import { DashboardPageShell } from "@/app/components/dashboard/dashboard-page-shell"
+import { DailyAttendanceView } from "@/app/components/attendance/daily-attendance-view"
 
 export default function AttendancePage() {
   useProtectedRoute()

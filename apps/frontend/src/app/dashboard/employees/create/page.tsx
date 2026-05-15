@@ -1,8 +1,8 @@
 "use client"
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
-import { ErrorBoundary } from "@/components/error-boundary"
-import { EmployeeFormView } from "@/components/employees/employee-form-view"
+import { ErrorBoundary } from "@/app/components/error-boundary"
+import { EmployeeFormView } from "@/app/components/employees/employee-form-view"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,9 +10,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
+} from "@/app/components/ui/breadcrumb"
+import { SidebarTrigger } from "@/app/components/ui/sidebar"
+import { Separator } from "@/app/components/ui/separator"
 
 export default function CreateEmployeePage() {
   useProtectedRoute()
