@@ -15,5 +15,6 @@
 		<module>apps/gateway-service</module>
 		<module>apps/auth-service</module>
 		<module>apps/employee-service</module>
+		<module>apps/performance-service</module>
 	</modules>
 </project>

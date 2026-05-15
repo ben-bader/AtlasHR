@@ -32,10 +32,30 @@ public class GatewayConfig {
 				.path("/api/auth/**")
 				.uri("http://hrms-auth-service:8081"))
 
-			// Employee/HR Service - handles all employee data and organization info
+			// Attendance Service - handles attendance, device attendance and daily attendance APIs
+			.route("attendance-service", r -> r
+				.path(
+					"/api/attendance/**",
+					"/api/device-attendance/**",
+					"/api/daily-attendance/**"
+				)
+				.uri("http://hrms-attendance-service:8085"))
+
+			// Performance Service - handles performance management APIs
+			.route("performance-service", r -> r
+				.path("/api/performance/**")
+				.uri("http://hrms-performance-service:8086"))
+
+			// Employee/HR Service - handles employee and org data
 			.route("employee-service", r -> r
-			.path("/api/**")
-			.uri("http://hrms-employee-service:8083"))
+				.path(
+					"/api/employees/**",
+					"/api/departments/**",
+					"/api/designations/**",
+					"/api/organization-chart/**",
+					"/api/employees/insurances/**"
+				)
+				.uri("http://hrms-employee-service:8083"))
 
 			.build();
 	}

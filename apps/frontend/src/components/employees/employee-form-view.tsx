@@ -66,18 +66,19 @@ export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
   const { updateEmployee, isLoading: isUpdating, error: updateError, setError: setUpdateError } =
     useUpdateEmployee(employeeId || "")
 
-  const isLoading = isCreating || isUpdating || (isEditMode && isLoadingEmployee) || isSubmitting
-  const error = createError || updateError
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting: formIsSubmitting },
     reset,
   } = useForm<EmployeeCreateFormValues>({
     resolver: zodResolver(employeeCreateSchema),
     mode: "onBlur",
   })
+
+  const isLoading = isCreating || isUpdating || (isEditMode && isLoadingEmployee) || formIsSubmitting
+  const error = createError || updateError
 
   useEffect(() => {
     if (isEditMode && existingEmployee) {
@@ -103,27 +104,17 @@ export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
   const onSubmit = async (data: EmployeeCreateFormValues) => {
     setCreateError(null)
     setUpdateError(null)
-    setIsSubmitting(true)
 
     try {
       const payload = toPayload(data)
-      const promise = isEditMode && employeeId 
-        ? updateEmployee(payload)
-        : createEmployee(payload)
-      
-      // Wait for mutation to complete
+      const promise = isEditMode && employeeId ? updateEmployee(payload) : createEmployee(payload)
+
       await promise
-      
-      // Navigate after mutation succeeds
-      if (onSuccess) {
-        onSuccess()
-      } else {
-        router.push("/dashboard/employees")
-      }
+
+      if (onSuccess) onSuccess()
+      else router.push("/dashboard/employees")
     } catch (err) {
       console.error("Failed to save employee:", err)
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -248,7 +239,7 @@ export function EmployeeFormView({ employeeId, onSuccess }: EmployeeFormProps) {
         </FormGroup>
 
         <div className="flex gap-4 pt-6">
-          <Button type="submit" disabled={isLoading || isSubmitting} className="flex-1">
+          <Button type="submit" disabled={isLoading || formIsSubmitting} className="flex-1">
             {isLoading ? "Saving..." : isEditMode ? "Update employee" : "Onboard employee"}
           </Button>
           <Button variant="outline" type="button" onClick={() => router.push("/dashboard/employees")} disabled={isLoading}>
