@@ -160,21 +160,5 @@ public class AttendanceController {
 
         return ApiResponse.success(null, "Attendance restored");
     }
-
-    // =====================================================
-    // BULK ATTENDANCE (IMPORTANT FOR HR / IMPORT)
-    // =====================================================
-    @PreAuthorize("hasAnyRole('HR','ADMIN')")
-    @PostMapping("/bulk")
-    public ApiResponse<List<AttendanceResponseDTO>> createBulk(
-            @RequestBody List<BulkAttendanceDTO> request
-    ) {
-
-        var result = attendanceService.createBulkAttendances(request)
-                .stream()
-                .map(attendanceMapper::toResponse)
-                .toList();
-
-        return ApiResponse.success(result, "Bulk attendance created");
-    }
+    
 }
