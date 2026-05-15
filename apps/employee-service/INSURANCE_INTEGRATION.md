@@ -77,16 +77,16 @@ Core operations:
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| POST | `/api/v1/employees/insurances` | Add new insurance |
-| GET | `/api/v1/employees/insurances/employee/{employeeId}` | Get all insurances |
-| GET | `/api/v1/employees/insurances/employee/{employeeId}/active` | Get active insurances |
-| GET | `/api/v1/employees/insurances/employee/{employeeId}/type/{insuranceType}` | Get by type |
-| GET | `/api/v1/employees/insurances/policy/{policyNumber}` | Lookup by policy |
-| PUT | `/api/v1/employees/insurances/{insuranceId}/status` | Update status |
-| POST | `/api/v1/employees/insurances/{insuranceId}/claim` | File claim |
-| DELETE | `/api/v1/employees/insurances/{insuranceId}` | Delete insurance |
+| POST | `/api/employees/insurances` | Add new insurance |
+| GET | `/api/employees/insurances/employee/{employeeId}` | Get all insurances |
+| GET | `/api/employees/insurances/employee/{employeeId}/active` | Get active insurances |
+| GET | `/api/employees/insurances/employee/{employeeId}/type/{insuranceType}` | Get by type |
+| GET | `/api/employees/insurances/policy/{policyNumber}` | Lookup by policy |
+| PUT | `/api/employees/insurances/{insuranceId}/status` | Update status |
+| POST | `/api/employees/insurances/{insuranceId}/claim` | File claim |
+| DELETE | `/api/employees/insurances/{insuranceId}` | Delete insurance |
 
-Gateway clients typically call `/api/employees/insurances/...` on the API gateway, which rewrites to `/api/v1/employees/insurances/...` on this service.
+Gateway clients call `/api/employees/insurances/...` on the API gateway, which forwards to `/api/employees/insurances/...` on this service.
 
 ### DTOs
 

@@ -22,7 +22,7 @@ import com.hrms.employee.application.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/v1/employees")
+@RequestMapping("/api/employees")
 @Slf4j
 public class EmployeeController {
 

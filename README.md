@@ -133,9 +133,9 @@ AtlasHR is a comprehensive HRMS platform built using microservices architecture,
 
 **Key Endpoints:**
 
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Refresh token
-- `GET /api/v1/auth/validate` - Validate token
+- `POST /api/auth/login` - User login
+- `POST /api/auth/refresh` - Refresh token
+- `GET /api/auth/validate` - Validate token
 
 ### 2. Employee Service (`apps/employee-service`)
 
@@ -158,11 +158,11 @@ AtlasHR is a comprehensive HRMS platform built using microservices architecture,
 
 **Key Endpoints:**
 
-- `POST /api/v1/employees/onboard` - Onboard new employee
-- `GET /api/v1/employees/{employeeId}` - Get employee profile
-- `POST /api/v1/employees/{employeeId}/promote` - Promote employee
-- `POST /api/v1/employees/{employeeId}/transfer` - Transfer employee
-- `POST /api/v1/employees/{employeeId}/terminate` - Terminate employee
+- `POST /api/employees/onboard` - Onboard new employee
+- `GET /api/employees/{employeeId}` - Get employee profile
+- `POST /api/employees/{employeeId}/promote` - Promote employee
+- `POST /api/employees/{employeeId}/transfer` - Transfer employee
+- `POST /api/employees/{employeeId}/terminate` - Terminate employee
 
 **Domain Events Published:**
 

@@ -4,36 +4,36 @@ import type { AddInsurancePayload, EmployeeInsurance } from "@/lib/types";
 export const insuranceAPI = {
   add: (body: AddInsurancePayload) =>
     api
-      .post<EmployeeInsurance>("/v1/employees/insurances", body)
+      .post<EmployeeInsurance>("/employees/insurances", body)
       .then((r) => r.data),
   byEmployee: (employeeId: string) =>
     api
       .get<EmployeeInsurance[]>(
-        `/v1/employees/insurances/employee/${encodeURIComponent(employeeId)}`
+        `/employees/insurances/employee/${encodeURIComponent(employeeId)}`
       )
       .then((r) => r.data),
   activeByEmployee: (employeeId: string) =>
     api
       .get<EmployeeInsurance[]>(
-        `/v1/employees/insurances/employee/${encodeURIComponent(employeeId)}/active`
+        `/employees/insurances/employee/${encodeURIComponent(employeeId)}/active`
       )
       .then((r) => r.data),
   byType: (employeeId: string, insuranceType: string) =>
     api
       .get<EmployeeInsurance[]>(
-        `/v1/employees/insurances/employee/${encodeURIComponent(employeeId)}/type/${encodeURIComponent(insuranceType)}`
+        `/employees/insurances/employee/${encodeURIComponent(employeeId)}/type/${encodeURIComponent(insuranceType)}`
       )
       .then((r) => r.data),
   byPolicy: (policyNumber: string) =>
     api
       .get<EmployeeInsurance>(
-        `/v1/employees/insurances/policy/${encodeURIComponent(policyNumber)}`
+        `/employees/insurances/policy/${encodeURIComponent(policyNumber)}`
       )
       .then((r) => r.data),
   updateStatus: (insuranceId: string, status: string) =>
     api
       .put<EmployeeInsurance>(
-        `/v1/employees/insurances/${encodeURIComponent(insuranceId)}/status`,
+        `/employees/insurances/${encodeURIComponent(insuranceId)}/status`,
         null,
         { params: { status } }
       )
@@ -45,11 +45,11 @@ export const insuranceAPI = {
   ) =>
     api
       .post<EmployeeInsurance>(
-        `/v1/employees/insurances/${encodeURIComponent(insuranceId)}/claim`,
+        `/employees/insurances/${encodeURIComponent(insuranceId)}/claim`,
         null,
         { params: { claimAmount, claimDetails } }
       )
       .then((r) => r.data),
   delete: (insuranceId: string) =>
-    api.delete(`/v1/employees/insurances/${encodeURIComponent(insuranceId)}`),
+    api.delete(`/employees/insurances/${encodeURIComponent(insuranceId)}`),
 };

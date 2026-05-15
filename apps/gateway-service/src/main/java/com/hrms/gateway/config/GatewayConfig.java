@@ -22,7 +22,7 @@ public class GatewayConfig {
 	 * 
 	 * Maps API paths to backend services:
 	 * - /api/auth/** → auth-service:8081 (login, register, refresh, user info)
-	 * - /api/v1/** → employee-service:8083 (employees, departments, designations, skills, insurance, org-chart)
+	 * - /api/** → employee-service:8083 (employees, departments, designations, skills, insurance, org-chart)
 	 */
 	@Bean
 	public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
