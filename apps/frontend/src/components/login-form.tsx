@@ -42,9 +42,12 @@ export function LoginForm({
       await login(data.username, data.password);
       // Redirect to dashboard on successful login
       router.push("/dashboard");
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || "Login failed. Please try again.";
-      setFormError(errorMessage);
+    } catch (err: unknown) {
+      const errorMessage =
+        typeof err === "object" && err !== null && "response" in err
+          ? (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+          : undefined;
+      setFormError(errorMessage || "Login failed. Please try again.");
     }
   };
 

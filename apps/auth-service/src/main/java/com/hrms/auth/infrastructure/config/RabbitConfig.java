@@ -38,6 +38,7 @@ public class RabbitConfig {
     }
 
     @Bean
+    @SuppressWarnings("removal")
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
@@ -46,7 +47,7 @@ public class RabbitConfig {
     @Bean
     public RabbitTemplate rabbitTemplate(
             ConnectionFactory connectionFactory,
-            Jackson2JsonMessageConverter messageConverter
+            @SuppressWarnings("removal") Jackson2JsonMessageConverter messageConverter
     ) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);

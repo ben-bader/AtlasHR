@@ -50,11 +50,8 @@ public class DeviceAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-
-            Device device =
-                    deviceAuthService.validateDeviceKey(apiKey);
-
-            deviceAuthService.updateLastSeen(device);
+            Device device = deviceService.validateDevice(apiKey);
+            deviceService.updateLastSeen(device);
 
             request.setAttribute("device", device);
 

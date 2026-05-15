@@ -29,8 +29,8 @@ public class DeviceAttendanceController {
         // 1. Verify biometrics / QR / NFC
         verificationEngineService.verify(request);
 
-        // 2. Check-in attendance
-        attendanceService.checkIn(request.getEmployeeId(), request);
+        // 3 check-in
+        attendanceService.checkIn(request);
 
         return ApiResponse.success(
                 "SUCCESS",

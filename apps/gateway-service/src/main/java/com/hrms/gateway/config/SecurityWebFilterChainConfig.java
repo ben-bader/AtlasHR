@@ -10,7 +10,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Spring Security Configuration for API Gateway
@@ -27,8 +28,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Configuration
 @EnableWebFluxSecurity
-@Slf4j
 public class SecurityWebFilterChainConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityWebFilterChainConfig.class);
 
 	/**
 	 * Main security filter chain for WebFlux

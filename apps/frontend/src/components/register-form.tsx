@@ -1,8 +1,7 @@
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { AxiosError } from "axios"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,7 +9,6 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { registerSchema, type RegisterFormValues } from "@/lib/validators/auth"
@@ -21,7 +19,6 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { register: registerUser, isLoading, error: authError, setError } = useAuth()
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -44,9 +41,7 @@ export function RegisterForm({
         email: data.email,
         password: data.password,
       })
-      // Redirect to dashboard on successful registration
-      const redirect = searchParams.get("redirect") || "/dashboard"
-      router.push(redirect)
+      router.push("/dashboard")
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err.message

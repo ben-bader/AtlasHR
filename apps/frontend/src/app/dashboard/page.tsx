@@ -22,8 +22,7 @@ export default function DashboardPage() {
   useProtectedRoute()
   const router = useRouter()
   const { user, logout } = useAuth()
-  const { employees, total } = useEmployeeList({ pageSize: 10 })
-  const { total: activeTotal } = useEmployeeList({ pageSize: 1, status: "ACTIVE" })
+  const { employees, total } = useEmployeeList({ pageSize: 1 })
 
   return (
     <>

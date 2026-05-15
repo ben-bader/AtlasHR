@@ -62,6 +62,7 @@ public class Shift extends BaseEntity {
             name = "shift_working_days",
             joinColumns = @JoinColumn(name = "shift_id")
     )
+    @Builder.Default
     private List<WorkDay> workingDays = new ArrayList<>();
 
     // ================= VERIFICATION METHODS =================
@@ -72,6 +73,7 @@ public class Shift extends BaseEntity {
             name = "shift_verification_methods",
             joinColumns = @JoinColumn(name = "shift_id")
     )
+    @Builder.Default
     private List<VerificationMethod> verificationMethods = new ArrayList<>();
 
     // ================= RELATIONS =================

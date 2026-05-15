@@ -69,6 +69,16 @@ const data = {
       url: "/dashboard/insurance",
       icon: <Shield className="size-4" />,
     },
+    {
+      title: "Attendance",
+      url: "/dashboard/attendance",
+      icon: <Users className="size-4" />,
+    },
+    {
+      title: "Profile",
+      url: "/dashboard/profile",
+      icon: <GalleryVerticalEnd className="size-4" />,
+    },
   ],
 }
 
