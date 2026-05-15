@@ -30,7 +30,7 @@ public class DeviceAttendanceController {
         verificationEngineService.verify(request);
 
         // 2. Check-in attendance
-        attendanceService.deviceCheckIn(request);
+        attendanceService.checkIn(request.getEmployeeId(), request);
 
         return ApiResponse.success(
                 "SUCCESS",

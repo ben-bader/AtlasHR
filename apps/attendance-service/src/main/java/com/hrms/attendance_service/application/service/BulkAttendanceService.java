@@ -4,6 +4,7 @@ import com.hrms.attendance_service.application.dto.*;
 import com.hrms.attendance_service.common.exceptions.BadRequestException;
 import com.hrms.attendance_service.domain.model.Attendance;
 import com.hrms.attendance_service.domain.repository.AttendanceRepository;
+import com.hrms.attendance_service.common.enums.AttendanceType;
 
 import lombok.RequiredArgsConstructor;
 

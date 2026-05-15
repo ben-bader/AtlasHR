@@ -1,7 +1,6 @@
 package com.hrms.attendance_service.application.service;
 
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
-import com.hrms.attendance_service.application.dto.BulkAttendanceDTO;
 import com.hrms.attendance_service.common.enums.AttendanceStatus;
 import com.hrms.attendance_service.common.exceptions.BadRequestException;
 import com.hrms.attendance_service.common.exceptions.ResourceNotFoundException;
@@ -29,8 +28,7 @@ public class AttendanceService {
     // =====================================================
     // CHECK IN
     // =====================================================
-    public Attendance checkIn(String employeeId,
-                              AttendanceVerificationRequestDTO request) {
+    public Attendance checkIn(String employeeId, AttendanceVerificationRequestDTO request) {
 
         verificationEngineService.verify(request);
 
