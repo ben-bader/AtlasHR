@@ -1,59 +1,58 @@
 package com.hrms.attendance_service.application.service;
 
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
+import com.hrms.attendance_service.verification.VerificationFactory;
+import com.hrms.attendance_service.verification.VerificationStrategy;
 import com.hrms.attendance_service.common.exceptions.BadRequestException;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class VerificationEngineService {
 
-    private final QrTokenService qrTokenService;
+    private final VerificationFactory verificationFactory;
 
-    public void verify(AttendanceVerificationRequestDTO request) {
+    public void verify(
+            AttendanceVerificationRequestDTO request
+    ) {
 
-        switch (request.getMethod()) {
+        validateRequest(request);
 
-            case QR_CODE -> verifyQr(request);
-            case NFC -> verifyNfc(request);
-            case FACE_RECOGNITION -> verifyFace(request);
-            case FINGERPRINT -> verifyFingerprint(request);
+        VerificationStrategy strategy =
+                verificationFactory.getStrategy(
+                        request.getMethod()
+                );
 
-            default -> throw new BadRequestException("Unsupported method");
+        strategy.verify(request);
+    }
+
+    private void validateRequest(
+            AttendanceVerificationRequestDTO request
+    ) {
+
+        if (request == null) {
+
+            throw new BadRequestException(
+                    "Request body is required"
+            );
         }
-    }
 
-    private void verifyQr(AttendanceVerificationRequestDTO request) {
+        if (request.getEmployeeId() == null
+                || request.getEmployeeId().isBlank()) {
 
-        if (request.getQrCode() == null)
-            throw new BadRequestException("QR required");
-
-        if (!qrTokenService.validateQr(request.getQrCode()))
-            throw new BadRequestException("QR expired/invalid");
-    }
-
-    private void verifyNfc(AttendanceVerificationRequestDTO request) {
-
-        if (request.getNfcTag() == null)
-            throw new BadRequestException("NFC required");
-    }
-
-    private void verifyFace(AttendanceVerificationRequestDTO request) {
-
-        if (request.getFaceMatchScore() == null ||
-                request.getFaceMatchScore() < 0.85) {
-
-            throw new BadRequestException("Face failed");
+            throw new BadRequestException(
+                    "Employee ID is required"
+            );
         }
-    }
 
-    private void verifyFingerprint(AttendanceVerificationRequestDTO request) {
+        if (request.getMethod() == null) {
 
-        if (request.getFingerprintMatched() == null ||
-                !request.getFingerprintMatched()) {
-
-            throw new BadRequestException("Fingerprint failed");
+            throw new BadRequestException(
+                    "Verification method is required"
+            );
         }
     }
 }

@@ -2,6 +2,7 @@
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
 import { EmployeeFormView } from "@/components/employees/employee-form-view"
+import { ErrorBoundary } from "@/components/error-boundary"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -53,7 +54,9 @@ export default function EditEmployeePage({ params }: EditEmployeePageProps) {
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <EmployeeFormView employeeId={params.id} />
+        <ErrorBoundary>
+          <EmployeeFormView employeeId={params.id} />
+        </ErrorBoundary>
       </div>
     </div>
   )

@@ -1,7 +1,6 @@
 package com.hrms.attendance_service.application.service;
 
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
-import com.hrms.attendance_service.application.dto.BulkAttendanceDTO;
 import com.hrms.attendance_service.common.enums.AttendanceStatus;
 import com.hrms.attendance_service.common.exceptions.BadRequestException;
 import com.hrms.attendance_service.common.exceptions.ResourceNotFoundException;
@@ -15,8 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +26,10 @@ public class AttendanceService {
     private final EventPublisherService eventPublisher;
 
     // =====================================================
-    // CHECK IN (WITH ALL VERIFICATION METHODS)
+    // CHECK IN
     // =====================================================
-    public Attendance checkIn(String employeeId,AttendanceVerificationRequestDTO request) {
+    public Attendance checkIn(String employeeId, AttendanceVerificationRequestDTO request) {
 
-        // VERIFY DEVICE + QR/NFC/BIOMETRIC/FACE
         verificationEngineService.verify(request);
 
         LocalDate today = LocalDate.now();
@@ -51,15 +48,18 @@ public class AttendanceService {
 
         attendance.setCheckIn(now);
         attendance.setMethod(request.getMethod());
-        attendance.setVerificationPayload(jsonMapperUtil.toJson(request));
 
-        Shift shift = attendance.getShift();
+        // SAFE payload
+        attendance.setVerificationPayload(
+                jsonMapperUtil.toJson(
+                        Map.of(
+                                "method", request.getMethod().name(),
+                                "deviceUid", request.getDeviceUid()
+                        )
+                )
+        );
 
-        if (shift != null) {
-            applyLateRule(attendance, shift, now.toLocalTime());
-        } else {
-            attendance.setStatus(AttendanceStatus.PRESENT);
-        }
+        applyShiftRulesOnCheckIn(attendance, now);
 
         Attendance saved = attendanceRepository.save(attendance);
 
@@ -69,14 +69,11 @@ public class AttendanceService {
     }
 
     // =====================================================
-    // CHECK OUT (WITH VERIFICATION ALSO)
+    // CHECK OUT
     // =====================================================
-    public Attendance checkOut(
-            String employeeId,
-            AttendanceVerificationRequestDTO request
-    ) {
+    public Attendance checkOut(String employeeId,
+                               AttendanceVerificationRequestDTO request) {
 
-        // VERIFY  
         verificationEngineService.verify(request);
 
         LocalDate today = LocalDate.now();
@@ -85,8 +82,7 @@ public class AttendanceService {
         Attendance attendance = attendanceRepository
                 .findByEmployeeIdAndDate(employeeId, today)
                 .orElseThrow(() ->
-                        new ResourceNotFoundException("No attendance found")
-                );
+                        new ResourceNotFoundException("No attendance found"));
 
         if (attendance.getCheckOut() != null) {
             throw new BadRequestException("Already checked out today");
@@ -94,100 +90,81 @@ public class AttendanceService {
 
         attendance.setCheckOut(now);
 
-        if (attendance.getCheckIn() != null) {
-            calculateWorkedHours(attendance);
-            applyOvertimeRule(attendance);
-        }
+        applyShiftRulesOnCheckOut(attendance);
 
         Attendance saved = attendanceRepository.save(attendance);
 
-        eventPublisher.publish(
-                RabbitMQConfig.EXCHANGE_NAME,
-                RabbitMQConfig.ATTENDANCE_CHECKOUT,
-                AttendanceCheckOutEvent.builder()
-                        .employeeId(employeeId)
-                        .attendanceId(saved.getId().toString())
-                        .checkOutTime(saved.getCheckOut())
-                        .workedHours(saved.getWorkedHours())
-                        .overtimeMinutes(saved.getOvertimeMinutes())
-                        .build()
-        );
+        publishCheckOutEvent(saved);
 
         return saved;
     }
 
     // =====================================================
-    // BULK ATTENDANCE
+    // SHIFT RULES
     // =====================================================
-    public List<Attendance> createBulkAttendances(List<BulkAttendanceDTO> dtos) {
+    private void applyShiftRulesOnCheckIn(Attendance attendance,
+                                          LocalDateTime checkInTime) {
 
-        List<Attendance> list = new ArrayList<>();
+        Shift shift = attendance.getShift();
 
-        for (BulkAttendanceDTO dto : dtos) {
-
-            if (attendanceRepository
-                    .existsByEmployeeIdAndDateAndDeletedFalse(
-                            dto.getEmployeeId(),
-                            dto.getDate()
-                    )) {
-                continue;
-            }
-
-            Attendance attendance = Attendance.builder()
-                    .employeeId(dto.getEmployeeId())
-                    .date(dto.getDate())
-                    .checkIn(dto.getCheckIn())
-                    .checkOut(dto.getCheckOut())
-                    .status(AttendanceStatus.PRESENT)
-                    .build();
-
-            list.add(attendance);
+        if (shift == null) {
+            attendance.setStatus(AttendanceStatus.PRESENT);
+            return;
         }
 
-        return attendanceRepository.saveAll(list);
+        LocalTime start = shift.getStartTime();
+        LocalTime allowed = start.plusMinutes(shift.getGracePeriodMinutes());
+
+        LocalTime checkIn = checkInTime.toLocalTime();
+
+        if (checkIn.isAfter(allowed)) {
+
+            attendance.setStatus(AttendanceStatus.LATE);
+            attendance.setIsLate(true);
+
+            int lateMinutes =
+                    (int) Duration.between(start, checkIn).toMinutes();
+
+            attendance.setLateMinutes(lateMinutes);
+
+        } else {
+            attendance.setStatus(AttendanceStatus.PRESENT);
+            attendance.setIsLate(false);
+            attendance.setLateMinutes(0);
+        }
     }
 
     // =====================================================
-    // DELETE
-    // =====================================================
-    public void deleteAttendance(Long id, String deletedBy) {
+    private void applyShiftRulesOnCheckOut(Attendance attendance) {
 
-        Attendance attendance = attendanceRepository
-                .findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
+        if (attendance.getCheckIn() == null ||
+            attendance.getCheckOut() == null) return;
 
-        attendance.setDeleted(true);
-        attendanceRepository.save(attendance);
+        long minutes = Duration.between(
+                attendance.getCheckIn(),
+                attendance.getCheckOut()
+        ).toMinutes();
 
-        publishDeletedEvent(attendance, deletedBy);
-    }
+        attendance.setWorkedHours(minutes / 60.0);
 
-    // =====================================================
-    // RESTORE
-    // =====================================================
-    public void restoreAttendance(Long id) {
+        Shift shift = attendance.getShift();
 
-        Attendance attendance = attendanceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
+        if (shift == null) return;
 
-        attendance.setDeleted(false);
-        attendanceRepository.save(attendance);
-    }
+        double workedMinutes = minutes;
+        double limitMinutes = shift.getMinimumWorkingHours() * 60;
 
-    // =====================================================
-    // GETTERS
-    // =====================================================
-    public Attendance getById(Long id) {
-        return attendanceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Attendance not found"));
-    }
+        if (workedMinutes > limitMinutes) {
 
-    public List<Attendance> getEmployeeAttendances(String employeeId) {
-        return attendanceRepository.findByEmployeeId(employeeId);
-    }
+            attendance.setIsOvertime(true);
+            attendance.setOvertimeMinutes(
+                    (int) (workedMinutes - limitMinutes)
+            );
 
-    public List<Attendance> getAttendancesByDate(String date) {
-        return attendanceRepository.findByDate(LocalDate.parse(date));
+        } else {
+            attendance.setIsOvertime(false);
+            attendance.setOvertimeMinutes(0);
+        }
     }
 
     // =====================================================
@@ -209,6 +186,66 @@ public class AttendanceService {
         );
     }
 
+    private void publishCheckOutEvent(Attendance attendance) {
+
+        AttendanceCheckOutEvent event = AttendanceCheckOutEvent.builder()
+                .attendanceId(attendance.getId().toString())
+                .employeeId(attendance.getEmployeeId())
+                .checkOutTime(attendance.getCheckOut())
+                .workedHours(attendance.getWorkedHours())
+                .overtimeMinutes(attendance.getOvertimeMinutes())
+                .build();
+
+        eventPublisher.publish(
+                RabbitMQConfig.EXCHANGE_NAME,
+                RabbitMQConfig.ATTENDANCE_CHECKOUT,
+                event
+        );
+    }
+
+    // =====================================================
+    // GETTERS
+    // =====================================================
+    public Attendance getById(Long id) {
+        return attendanceRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Attendance not found"));
+    }
+
+    public List<Attendance> getEmployeeAttendances(String employeeId) {
+        return attendanceRepository.findByEmployeeId(employeeId);
+    }
+
+    public List<Attendance> getAttendancesByDate(String date) {
+        return attendanceRepository.findByDate(LocalDate.parse(date));
+    }
+
+    // =====================================================
+    // DELETE / RESTORE
+    // =====================================================
+    public void deleteAttendance(Long id, String deletedBy) {
+
+        Attendance attendance = attendanceRepository
+                .findByIdAndDeletedFalse(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Attendance not found"));
+
+        attendance.setDeleted(true);
+        attendanceRepository.save(attendance);
+
+        publishDeletedEvent(attendance, deletedBy);
+    }
+
+    public void restoreAttendance(Long id) {
+
+        Attendance attendance = attendanceRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Attendance not found"));
+
+        attendance.setDeleted(false);
+        attendanceRepository.save(attendance);
+    }
+
     private void publishDeletedEvent(Attendance attendance, String deletedBy) {
 
         AttendanceDeletedEvent event = AttendanceDeletedEvent.builder()
@@ -223,57 +260,5 @@ public class AttendanceService {
                 RabbitMQConfig.ATTENDANCE_DELETED,
                 event
         );
-    }
-
-    // =====================================================
-    // BUSINESS LOGIC
-    // =====================================================
-    private void applyLateRule(Attendance attendance, Shift shift, LocalTime checkInTime) {
-
-        LocalTime start = shift.getStartTime();
-        int grace = shift.getGracePeriodMinutes();
-        LocalTime allowedTime = start.plusMinutes(grace);
-
-        if (checkInTime.isAfter(allowedTime)) {
-
-            attendance.setStatus(AttendanceStatus.LATE);
-            attendance.setIsLate(true);
-
-            int minutesLate = (int) Duration.between(start, checkInTime).toMinutes();
-            attendance.setLateMinutes(minutesLate);
-
-        } else {
-            attendance.setStatus(AttendanceStatus.PRESENT);
-            attendance.setIsLate(false);
-            attendance.setLateMinutes(0);
-        }
-    }
-
-    private void calculateWorkedHours(Attendance attendance) {
-
-        long minutes = Duration.between(
-                attendance.getCheckIn(),
-                attendance.getCheckOut()
-        ).toMinutes();
-
-        attendance.setWorkedHours(minutes / 60.0);
-    }
-
-    private void applyOvertimeRule(Attendance attendance) {
-
-        Shift shift = attendance.getShift();
-
-        if (shift == null || attendance.getWorkedHours() == null) return;
-
-        double worked = attendance.getWorkedHours();
-        double limit = shift.getMinimumWorkingHours();
-
-        if (worked > limit) {
-            attendance.setIsOvertime(true);
-            attendance.setOvertimeMinutes((int) ((worked - limit) * 60));
-        } else {
-            attendance.setIsOvertime(false);
-            attendance.setOvertimeMinutes(0);
-        }
     }
 }

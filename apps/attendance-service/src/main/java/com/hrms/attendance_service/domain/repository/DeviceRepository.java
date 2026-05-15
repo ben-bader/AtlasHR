@@ -10,5 +10,4 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     Optional<Device> findByDeviceUid(String deviceUid);
 
     Optional<Device> findByApiKeyAndActiveTrue(String apiKey);
-
 }

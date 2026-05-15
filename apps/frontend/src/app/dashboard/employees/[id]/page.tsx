@@ -2,6 +2,7 @@
 
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
 import { EmployeeDetailsView } from "@/components/employees/employee-details-view"
+import { ErrorBoundary } from "@/components/error-boundary"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -53,7 +54,9 @@ export default function EmployeeDetailsPage({ params }: EmployeeDetailsPageProps
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <EmployeeDetailsView employeeId={params.id} />
+        <ErrorBoundary>
+          <EmployeeDetailsView employeeId={params.id} />
+        </ErrorBoundary>
       </div>
     </div>
   )

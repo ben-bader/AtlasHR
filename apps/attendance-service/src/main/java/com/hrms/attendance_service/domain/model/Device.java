@@ -19,9 +19,11 @@ public class Device extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String deviceUid;
 
+    @Column(nullable = false)
     private String deviceName;
 
-    // QR | NFC | FACE | FINGERPRINT
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private VerificationMethod deviceType;
 
     @Column(unique = true, nullable = false)
@@ -29,6 +31,7 @@ public class Device extends BaseEntity {
 
     private String location;
 
+    @Column(nullable = false)
     private Boolean active;
 
     private LocalDateTime lastSeen;
@@ -36,7 +39,8 @@ public class Device extends BaseEntity {
     @PrePersist
     public void prePersist() {
 
-        if (active == null)
+        if (active == null) {
             active = true;
+        }
     }
 }

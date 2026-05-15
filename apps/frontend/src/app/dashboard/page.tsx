@@ -3,6 +3,7 @@
 import { useProtectedRoute } from "@/hooks/useProtectedRoute"
 import { useAuth } from "@/hooks/useAuth"
 import { useEmployeeList } from "@/hooks/useEmployee"
+import { ErrorBoundary } from "@/components/error-boundary"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,7 +22,7 @@ export default function DashboardPage() {
   useProtectedRoute()
   const router = useRouter()
   const { user, logout } = useAuth()
-  const { total } = useEmployeeList({ pageSize: 1 })
+  const { employees, total } = useEmployeeList({ pageSize: 1 })
 
   return (
     <>
@@ -60,7 +61,8 @@ export default function DashboardPage() {
             </div>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <ErrorBoundary>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid auto-rows-min gap-4 md:grid-cols-3">
             <div className="rounded-lg border border-border bg-background p-6 hover:shadow-md transition-shadow cursor-pointer" onClick={() => router.push("/dashboard/employees")}>
               <div className="flex items-center justify-between">
@@ -78,7 +80,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Active Employees</p>
-                  <p className="text-3xl font-bold mt-2">-</p>
+                  <p className="text-3xl font-bold mt-2">{activeTotal || 0}</p>
                 </div>
                 <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
                   <BarChart3 className="h-6 w-6 text-green-600" />
@@ -172,6 +174,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        </ErrorBoundary>
     </>
   )
 }

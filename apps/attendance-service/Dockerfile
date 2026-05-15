@@ -29,6 +29,6 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 USER appuser
 
-EXPOSE 8082
+EXPOSE 8085
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

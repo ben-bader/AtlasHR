@@ -47,6 +47,7 @@
   declare -A SERVICES
   SERVICES=(
     [auth-service]="$SCRIPT_DIR/apps/auth-service/docker-compose.yml"
+    [attendance-service]="$SCRIPT_DIR/apps/attendance-service/docker-compose.yml"
     [employee-service]="$SCRIPT_DIR/apps/employee-service/docker-compose.yml"
     [api-gateway]="$SCRIPT_DIR/apps/gateway-service/docker-compose.yml"
     [frontend]="$SCRIPT_DIR/apps/frontend/docker-compose.yml"
@@ -54,6 +55,7 @@
 
   # Start order matters -- auth before gateway, gateway before frontend
   SERVICE_ORDER=(
+    attendance-service
     auth-service
     employee-service
     api-gateway
@@ -256,6 +258,7 @@
   echo -e "  API Gateway      ->  http://localhost:8080/api"
   echo -e "  Auth Service     ->  http://localhost:8081/actuator/health"
   echo -e "  Employee Service ->  http://localhost:8083/actuator/health"
+  echo -e "  Attendance Service ->  http://localhost:8085/actuator/health"
   echo -e "  RabbitMQ UI      ->  http://localhost:15672  (hrms / hrms_pass)"
   echo -e "  Postgres         ->  localhost:5432  (hrms / hrms_pass)"
   echo -e "  Redis            ->  localhost:6379"

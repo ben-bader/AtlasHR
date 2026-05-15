@@ -8,7 +8,7 @@ services:
 
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SERVER_PORT: 8082
+      SERVER_PORT: 8085
 
       # =====================================
       # DATABASE (Docker network hostname)
@@ -37,7 +37,7 @@ services:
       GATEWAY_ENABLED: "true"
 
     ports:
-      - "8082:8082"
+      - "8085:8085"
 
     networks:
       - hrms-network
@@ -55,4 +55,3 @@ networks:
   hrms-network:
     name: hrms-network
     external: true
-    
