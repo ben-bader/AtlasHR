@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { authAPI, AuthResponse, UserDTO } from "@/lib/api/auth";
-import { setTokens, clearTokens } from "@/lib/utils/token";
+import { setTokens, clearTokens, getAccessToken } from "@/lib/utils/token";
 import { RegisterRequest } from "@/lib/types";
 import { AxiosError } from "axios";
 
@@ -86,8 +86,20 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    // Call logout API to blacklist token if available
+    const token = getAccessToken();
+    if (token) {
+      try {
+        authAPI.logout(token).catch(() => {
+          // Ignore errors, just clear local tokens
+        });
+      } catch (error) {
+        console.warn("Logout API call failed", error);
+      }
+    }
+    
+    // Clear tokens
     clearTokens();
-    authAPI.logout();
     set({
       user: null,
       token: null,

@@ -30,7 +30,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users", indexes = {@Index(name = "idx_username", columnList = "username", unique = true)})
+@Table(name = "users", indexes = {
+    @Index(name = "idx_employee_id", columnList = "employee_id", unique = true),
+    @Index(name = "idx_username", columnList = "username")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -41,10 +44,22 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    /**
+     * Employee ID from Employee Service
+     * Used for login instead of username
+     * This is the primary identifier for authentication
+     */
+    @Column(nullable = false, unique = true, name = "employee_id", length = 20)
+    private String employeeId;
+
+    /**
+     * Username field (kept for backward compatibility)
+     * May be same as employeeId or derived from it
+     */
+    @Column(unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String email;
 
     @Column(nullable = false)

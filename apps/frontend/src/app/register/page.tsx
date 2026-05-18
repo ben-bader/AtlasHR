@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { RegisterForm } from "@/app/components/register-form"
 import { GalleryVerticalEndIcon } from "lucide-react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store/auth"
+import { Button } from "@/app/components/ui/button"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -31,8 +31,27 @@ export default function RegisterPage() {
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <RegisterForm />
+          <div className="w-full max-w-xs space-y-4 text-center">
+            <div>
+              <h1 className="text-2xl font-bold">Registration Disabled</h1>
+              <p className="text-sm text-muted-foreground mt-2">
+                Public registration is no longer available. Users are now onboarded by administrators.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                If you need access to AtlasHR, please contact your administrator.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                If you already have credentials, please log in below.
+              </p>
+            </div>
+            <Button 
+              onClick={() => router.push("/login")}
+              className="w-full"
+            >
+              Go to Login
+            </Button>
           </div>
         </div>
       </div>
@@ -48,3 +67,4 @@ export default function RegisterPage() {
     </div>
   )
 }
+

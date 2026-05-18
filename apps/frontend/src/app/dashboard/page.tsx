@@ -23,6 +23,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const { user, logout } = useAuth()
   const { employees, total } = useEmployeeList({ pageSize: 1 })
+  const { total: activeTotal } = useEmployeeList({ pageSize: 1, status: 'ACTIVE' })
 
   return (
     <>

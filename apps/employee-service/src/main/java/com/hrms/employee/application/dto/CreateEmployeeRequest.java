@@ -1,7 +1,12 @@
 package com.hrms.employee.application.dto;
 
-import lombok.*;
 import java.time.LocalDate;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -62,5 +67,11 @@ public class CreateEmployeeRequest {
     private String reportingManagerId;
     private LocalDate joiningDate;
     private String grade;
+
+    /**
+     * Initial password for employee login
+     * Required when creating a new employee - will be used to create auth user
+     */
+    private String password;
 
 }

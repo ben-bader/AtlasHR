@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hrms.auth.application.dto.AuthResponse;
+import com.hrms.auth.application.dto.CreateAuthUserRequest;
 import com.hrms.auth.application.dto.LoginRequest;
 import com.hrms.auth.application.dto.RegisterRequest;
 import com.hrms.auth.application.dto.UserDTO;
@@ -52,6 +53,9 @@ public class AuthService implements UserDetailsService {
 
     @Autowired
     private UserEventPublisher eventPublisher;
+
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
 
     public AuthService(
             ObjectProvider<AuthenticationManager> authenticationManagerProvider,
@@ -145,9 +149,13 @@ public class AuthService implements UserDetailsService {
             if (authManager == null) {
                 throw new RuntimeException("AuthenticationManager not available");
             }
+            
+            // Support login with both employeeId and username
+            String loginIdentifier = request.getUsername();
+            
             Authentication authentication = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
+                            loginIdentifier,
                             request.getPassword()
                     )
             );
@@ -156,8 +164,11 @@ public class AuthService implements UserDetailsService {
             String token = tokenProvider.generateToken(userDetails);
             String refreshToken = tokenProvider.generateRefreshToken(userDetails);
 
-            User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
-            log.info("User logged in successfully: {}", user.getUsername());
+            User user = userRepository.findByUsername(loginIdentifier)
+                    .or(() -> userRepository.findByEmployeeId(loginIdentifier))
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            
+            log.info("User logged in successfully: {} (employeeId: {})", user.getUsername(), user.getEmployeeId());
 
             return AuthResponse.builder()
                     .token(token)
@@ -237,8 +248,176 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
+                .or(() -> userRepository.findByEmployeeId(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         log.debug("User loaded from database: {}", username);
         return user;
+    }
+
+    /**
+     * Create auth user for employee (Admin-driven)
+     * Called by Employee Service when onboarding employees
+     * 
+     * @param request CreateAuthUserRequest with employeeId and password
+     * @return AuthResponse with user details
+     */
+    public AuthResponse createAuthUser(CreateAuthUserRequest request) {
+        try {
+            log.info("Creating auth user for employeeId: {}", request.getEmployeeId());
+
+            // Check if user already exists
+            if (userRepository.existsByEmployeeId(request.getEmployeeId())) {
+                log.warn("Auth user already exists for employeeId: {}", request.getEmployeeId());
+                return AuthResponse.builder()
+                        .message("User already exists for this employee")
+                        .build();
+            }
+
+            // Get password encoder
+            PasswordEncoder encoder = passwordEncoderProvider.getIfAvailable();
+            if (encoder == null) {
+                throw new RuntimeException("PasswordEncoder bean not found");
+            }
+
+            // Get or create default role
+            Role userRole = roleRepository.findByName("USER")
+                    .orElseGet(() -> roleRepository.save(
+                            Role.builder()
+                                    .name("USER")
+                                    .description("Default user role")
+                                    .build()
+                    ));
+
+            // Build user with employeeId
+            User user = User.builder()
+                    .employeeId(request.getEmployeeId())
+                    .username(request.getEmployeeId()) // Use employeeId as username for login
+                    .email(request.getEmail())
+                    .password(encoder.encode(request.getPassword()))
+                    .enabled(true)
+                    .accountNonExpired(true)
+                    .accountNonLocked(true)
+                    .credentialsNonExpired(true)
+                    .roles(new HashSet<>(Set.of(userRole)))
+                    .build();
+
+            // Save user
+            User savedUser = userRepository.save(user);
+
+            // Publish event
+            String roles = savedUser.getRoles()
+                    .stream()
+                    .map(Role::getName)
+                    .collect(Collectors.joining(","));
+
+            UserEvent event = UserEvent.builder()
+                    .eventType("user.created")
+                    .userId(savedUser.getId().toString())
+                    .username(savedUser.getUsername())
+                    .email(savedUser.getEmail())
+                    .timestamp(LocalDateTime.now())
+                    .roles(roles)
+                    .build();
+
+            eventPublisher.publishUserCreated(event);
+
+            log.info("Auth user created successfully for employeeId: {}", request.getEmployeeId());
+
+            return AuthResponse.builder()
+                    .userId(savedUser.getId())
+                    .username(savedUser.getUsername())
+                    .message("User created successfully")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error creating auth user: {}", e.getMessage(), e);
+            return AuthResponse.builder()
+                    .message("Failed to create user: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    /**
+     * Logout user and blacklist token
+     * 
+     * @param token the JWT token to blacklist
+     * @return success response
+     */
+    public AuthResponse logout(String token) {
+        try {
+            if (token == null || token.isEmpty()) {
+                return AuthResponse.builder()
+                        .message("Invalid token")
+                        .build();
+            }
+
+            // Validate token and extract claims
+            if (!tokenProvider.validateToken(token)) {
+                return AuthResponse.builder()
+                        .message("Invalid or expired token")
+                        .build();
+            }
+
+            // Extract token information
+            String username = tokenProvider.getUsernameFromToken(token);
+            io.jsonwebtoken.Claims claims = tokenProvider.parseToken(token);
+            
+            String tokenJti = claims.getId(); // JWT ID claim
+            if (tokenJti == null || tokenJti.isEmpty()) {
+                // If no jti claim, generate one from username + timestamp
+                tokenJti = username + "_" + System.currentTimeMillis();
+            }
+
+            // Get user to extract userId and employeeId
+            User user = userRepository.findByUsername(username)
+                    .or(() -> userRepository.findByEmployeeId(username))
+                    .orElse(null);
+
+            if (user == null) {
+                log.warn("User not found during logout: {}", username);
+                return AuthResponse.builder()
+                        .message("User not found")
+                        .build();
+            }
+
+            // Get token expiration time
+            java.util.Date expirationDate = claims.getExpiration();
+            LocalDateTime expirationTime = expirationDate != null 
+                    ? expirationDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+                    : LocalDateTime.now().plusHours(24);
+
+            // Blacklist the token
+            tokenBlacklistService.blacklistToken(
+                    tokenJti,
+                    user.getId(),
+                    user.getEmployeeId(),
+                    expirationTime,
+                    "logout"
+            );
+
+            log.info("User logged out successfully: {} (employeeId: {})", username, user.getEmployeeId());
+
+            return AuthResponse.builder()
+                    .message("Logout successful")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error during logout: {}", e.getMessage(), e);
+            return AuthResponse.builder()
+                    .message("Logout failed: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    /**
+     * Get user by employeeId
+     * 
+     * @param employeeId the employee ID
+     * @return UserDTO with user details
+     */
+    public UserDTO getUserByEmployeeId(String employeeId) {
+        return userRepository.findByEmployeeId(employeeId)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found for employeeId: " + employeeId));
     }
 }

@@ -39,7 +39,8 @@ export function LoginForm({
     setError(null);
 
     try {
-      await login(data.username, data.password);
+      // Updated to use employeeId instead of username
+      await login(data.employeeId, data.password);
       // Redirect to dashboard on successful login
       router.push("/dashboard");
     } catch (err: unknown) {
@@ -64,7 +65,7 @@ export function LoginForm({
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
           <p className="text-sm text-balance text-muted-foreground">
-            Enter your username and password below
+            Enter your employee ID and password below
           </p>
         </div>
 
@@ -75,16 +76,16 @@ export function LoginForm({
         )}
 
         <Field>
-          <FieldLabel htmlFor="username">Username</FieldLabel>
+          <FieldLabel htmlFor="employeeId">Employee ID</FieldLabel>
           <Input
-            id="username"
+            id="employeeId"
             type="text"
-            placeholder="john.doe"
+            placeholder="E00001"
             disabled={isSubmittingForm}
-            {...register("username")}
+            {...register("employeeId")}
           />
-          {errors.username && (
-            <p className="text-sm text-red-500">{errors.username.message}</p>
+          {errors.employeeId && (
+            <p className="text-sm text-red-500">{errors.employeeId.message}</p>
           )}
         </Field>
 
@@ -135,10 +136,7 @@ export function LoginForm({
             Login with GitHub
           </Button>
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
-            <a href="/register" className="underline underline-offset-4">
-              Sign up
-            </a>
+            Don&apos;t have an account? Contact your administrator to be onboarded.
           </FieldDescription>
         </Field>
       </FieldGroup>
