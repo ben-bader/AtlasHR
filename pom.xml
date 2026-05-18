@@ -16,5 +16,6 @@
 		<module>apps/auth-service</module>
 		<module>apps/employee-service</module>
 		<module>apps/performance-service</module>
+		<module>apps/hrms-common</module>
 	</modules>
 </project>
