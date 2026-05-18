@@ -2,7 +2,7 @@ package com.hrms.attendance_service.verification;
 
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
 import com.hrms.attendance_service.common.enums.VerificationMethod;
-import com.hrms.attendance_service.common.exceptions.BadRequestException;
+import com.hrms.common.exception.BadRequestException;
 import com.hrms.attendance_service.domain.model.EmployeeVerificationCredential;
 import com.hrms.attendance_service.domain.repository.CredentialRepository;
 

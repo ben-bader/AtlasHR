@@ -1,9 +1,13 @@
 package com.hrms.employee.common.exception;
 
+import com.hrms.common.exception.ResourceNotFoundException;
+
 /**
- * Custom exception for entity not found
+ * Thrown when a requested entity does not exist.
+ * Extends the common ResourceNotFoundException so the shared GlobalExceptionHandler
+ * returns a 404 ApiResponse without any service-level handler.
  */
-public class EntityNotFoundException extends RuntimeException {
+public class EntityNotFoundException extends ResourceNotFoundException {
 
     private final String entityName;
     private final String identifier;
@@ -26,12 +30,6 @@ public class EntityNotFoundException extends RuntimeException {
         this.identifier = "Unknown";
     }
 
-    public String getEntityName() {
-        return entityName;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
+    public String getEntityName() { return entityName; }
+    public String getIdentifier() { return identifier; }
 }

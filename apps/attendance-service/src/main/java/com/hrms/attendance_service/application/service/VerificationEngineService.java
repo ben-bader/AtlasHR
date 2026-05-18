@@ -3,7 +3,7 @@ package com.hrms.attendance_service.application.service;
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
 import com.hrms.attendance_service.verification.VerificationFactory;
 import com.hrms.attendance_service.verification.VerificationStrategy;
-import com.hrms.attendance_service.common.exceptions.BadRequestException;
+import com.hrms.common.exception.BadRequestException;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,0 +1,106 @@
+# ============================================================
+
+# HRMS monorepo — root .gitignore for apps/
+# Covers all services: auth, employee, attendance,
+# performance, gateway, hrms-common
+# ============================================================
+
+# ---------------------------------------------------------------
+# SECRETS & ENVIRONMENT — never commit these
+# ---------------------------------------------------------------
+.env
+.env.*
+*.env
+**/src/main/resources/secrets/
+**/src/main/resources/*.p12
+**/src/main/resources/*.jks
+**/src/main/resources/*.pem
+
+# ---------------------------------------------------------------
+# MAVEN BUILD OUTPUT
+# ---------------------------------------------------------------
+target/
+**/target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven wrapper JAR (properties file is fine to track)
+.mvn/wrapper/maven-wrapper.jar
+**/.mvn/wrapper/maven-wrapper.jar
+
+# Maven release plugin artifacts
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# ---------------------------------------------------------------
+# IDE — IntelliJ IDEA
+# ---------------------------------------------------------------
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# ---------------------------------------------------------------
+# IDE — VS Code
+# ---------------------------------------------------------------
+.vscode/
+
+# ---------------------------------------------------------------
+# IDE — Eclipse / STS
+# ---------------------------------------------------------------
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.c9/
+*.launch
+
+# ---------------------------------------------------------------
+# IDE — NetBeans
+# ---------------------------------------------------------------
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ---------------------------------------------------------------
+# LOGS
+# ---------------------------------------------------------------
+logs/
+*.log
+*.log.*
+spring.log
+
+# ---------------------------------------------------------------
+# OS
+# ---------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# ---------------------------------------------------------------
+# DOCKER
+# ---------------------------------------------------------------
+docker-compose.override.yml
+
+# ---------------------------------------------------------------
+# SPRING BOOT
+# ---------------------------------------------------------------
+spring-boot-devtools.properties
+HELP.md

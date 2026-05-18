@@ -1,9 +1,13 @@
 package com.hrms.employee.common.exception;
 
+import com.hrms.common.exception.BadRequestException;
+
 /**
- * Custom exception for invalid operations
+ * Thrown when a business operation is not allowed in the current state.
+ * Extends the common BadRequestException so the shared GlobalExceptionHandler
+ * returns a 400 ApiResponse without any service-level handler.
  */
-public class InvalidOperationException extends RuntimeException {
+public class InvalidOperationException extends BadRequestException {
 
     private final String operation;
     private final String reason;
@@ -20,12 +24,6 @@ public class InvalidOperationException extends RuntimeException {
         this.reason = message;
     }
 
-    public String getOperation() {
-        return operation;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
+    public String getOperation() { return operation; }
+    public String getReason() { return reason; }
 }

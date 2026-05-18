@@ -4,7 +4,7 @@ import com.hrms.attendance_service.application.dto.ShiftPlanningRequestDTO;
 import com.hrms.attendance_service.application.dto.ShiftPlanningResponseDTO;
 import com.hrms.attendance_service.application.mapper.ShiftPlanningMapper;
 import com.hrms.attendance_service.application.service.ShiftPlanningService;
-import com.hrms.attendance_service.common.api.ApiResponse;
+import com.hrms.common.api.ApiResponse;
 import com.hrms.attendance_service.common.enums.PlanningStatus;
 
 import jakarta.validation.Valid;

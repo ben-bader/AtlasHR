@@ -2,7 +2,7 @@ package com.hrms.attendance_service.presentation.controller;
 
 import com.hrms.attendance_service.application.dto.BulkAttendanceRequestDTO;
 import com.hrms.attendance_service.application.service.BulkAttendanceService;
-import com.hrms.attendance_service.common.api.ApiResponse;
+import com.hrms.common.api.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
 

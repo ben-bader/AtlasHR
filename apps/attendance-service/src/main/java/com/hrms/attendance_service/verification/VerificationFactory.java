@@ -1,7 +1,7 @@
 package com.hrms.attendance_service.verification;
 
 import com.hrms.attendance_service.common.enums.VerificationMethod;
-import com.hrms.attendance_service.common.exceptions.BadRequestException;
+import com.hrms.common.exception.BadRequestException;
 
 import org.springframework.stereotype.Component;
 

@@ -1,49 +1,21 @@
 package com.hrms.employee.application.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.hrms.employee.application.dto.CreateEmployeeRequest;
-import com.hrms.employee.application.dto.EmployeeInsuranceResponse;
-import com.hrms.employee.application.dto.EmployeeResponse;
-import com.hrms.employee.application.dto.PromoteEmployeeRequest;
-import com.hrms.employee.application.dto.TerminateEmployeeRequest;
-import com.hrms.employee.application.dto.TransferEmployeeRequest;
+import com.hrms.employee.application.dto.*;
 import com.hrms.employee.common.constants.ApplicationConstants;
 import com.hrms.employee.common.enums.EmploymentChangeType;
 import com.hrms.employee.common.enums.EmploymentStatus;
 import com.hrms.employee.common.enums.InsuranceType;
 import com.hrms.employee.common.utils.IdGeneratorFactory;
-import com.hrms.employee.domain.model.BankDetails;
-import com.hrms.employee.domain.model.ContactInfo;
-import com.hrms.employee.domain.model.Department;
-import com.hrms.employee.domain.model.Designation;
-import com.hrms.employee.domain.model.EmergencyContact;
-import com.hrms.employee.domain.model.Employee;
-import com.hrms.employee.domain.model.EmployeeInsurance;
-import com.hrms.employee.domain.model.EmploymentHistory;
-import com.hrms.employee.domain.model.InsuranceDetails;
-import com.hrms.employee.domain.model.OrganizationChart;
-import com.hrms.employee.domain.model.PersonalInfo;
-import com.hrms.employee.domain.repository.DepartmentRepository;
-import com.hrms.employee.domain.repository.DesignationRepository;
-import com.hrms.employee.domain.repository.EmployeeInsuranceRepository;
-import com.hrms.employee.domain.repository.EmployeeRepository;
-import com.hrms.employee.domain.repository.EmploymentHistoryRepository;
-import com.hrms.employee.domain.repository.OrganizationChartRepository;
-import com.hrms.employee.infrastructure.event.DomainEventPublisher;
-import com.hrms.employee.infrastructure.event.EmployeeCreatedEvent;
-import com.hrms.employee.infrastructure.event.EmployeeTerminatedEvent;
-import com.hrms.employee.infrastructure.event.EmployeeTransferredEvent;
-import com.hrms.employee.infrastructure.event.EmployeeUpdatedEvent;
-import com.hrms.employee.infrastructure.service.AuthServiceClient;
-
+import com.hrms.employee.domain.model.*;
+import com.hrms.employee.domain.repository.*;
+import com.hrms.employee.infrastructure.event.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -58,7 +30,6 @@ public class EmployeeService {
     private final EmployeeInsuranceRepository employeeInsuranceRepository;
     private final DomainEventPublisher eventPublisher;
     private final IdGeneratorFactory idGeneratorFactory;
-    private final AuthServiceClient authServiceClient;
 
     public EmployeeService(EmployeeRepository employeeRepository,
                           DepartmentRepository departmentRepository,
@@ -67,8 +38,7 @@ public class EmployeeService {
                           OrganizationChartRepository organizationChartRepository,
                           EmployeeInsuranceRepository employeeInsuranceRepository,
                           DomainEventPublisher eventPublisher,
-                          IdGeneratorFactory idGeneratorFactory,
-                          AuthServiceClient authServiceClient) {
+                          IdGeneratorFactory idGeneratorFactory) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.designationRepository = designationRepository;
@@ -77,23 +47,13 @@ public class EmployeeService {
         this.employeeInsuranceRepository = employeeInsuranceRepository;
         this.eventPublisher = eventPublisher;
         this.idGeneratorFactory = idGeneratorFactory;
-        this.authServiceClient = authServiceClient;
     }
 
     /**
      * Onboard a new employee
-     * 
-     * This method:
-     * 1. Creates the employee record in Employee Service
-     * 2. Calls Auth Service to create the authentication user
      */
     public EmployeeResponse onboardEmployee(CreateEmployeeRequest request) {
         log.info("Onboarding new employee: {}", request.getEmail());
-
-        // Validate password is provided
-        if (request.getPassword() == null || request.getPassword().isEmpty()) {
-            throw new RuntimeException("Password is required to onboard an employee");
-        }
 
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new RuntimeException("Department not found"));
@@ -160,40 +120,13 @@ public class EmployeeService {
                 .grade(request.getGrade())
                 .build();
 
-        // Save employee first
         employee = employeeRepository.save(employee);
-        
-        log.info("Employee record created: {} (employeeId: {})", request.getEmail(), employee.getId());
 
         // Create organization chart entry
         createOrganizationChartEntry(employee, reportingManager);
 
-        // Publish employee created event
+        // Publish event
         publishEmployeeCreatedEvent(employee);
-
-        // Create authentication user in Auth Service
-        try {
-            boolean authUserCreated = authServiceClient.createAuthUser(
-                    employee.getId(),
-                    employee.getEmail(),
-                    request.getPassword(),
-                    employee.getFirstName(),
-                    employee.getLastName()
-            );
-
-            if (authUserCreated) {
-                log.info("Auth user created successfully for employeeId: {}", employee.getId());
-            } else {
-                log.warn("Auth user creation failed for employeeId: {}. Employee can be onboarded but cannot login yet.", 
-                        employee.getId());
-                // Note: We don't throw exception here to allow employee record to be created
-                // even if auth user creation fails temporarily. Admin should manually create
-                // auth user or retry the operation.
-            }
-        } catch (Exception e) {
-            log.error("Error creating auth user for employeeId {}: {}", employee.getId(), e.getMessage(), e);
-            // Continue anyway - employee is created, auth user might be created manually later
-        }
 
         log.info("Employee onboarded successfully: {}", employee.getId());
 

@@ -3,7 +3,7 @@ package com.hrms.attendance_service.presentation.controller;
 import com.hrms.attendance_service.application.dto.*;
 import com.hrms.attendance_service.application.mapper.AttendanceMapper;
 import com.hrms.attendance_service.application.service.AttendanceService;
-import com.hrms.attendance_service.common.api.ApiResponse;
+import com.hrms.common.api.ApiResponse;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;

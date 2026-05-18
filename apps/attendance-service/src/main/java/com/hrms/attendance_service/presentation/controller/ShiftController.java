@@ -4,7 +4,7 @@ import com.hrms.attendance_service.application.dto.ShiftRequestDTO;
 import com.hrms.attendance_service.application.dto.ShiftResponseDTO;
 import com.hrms.attendance_service.application.mapper.ShiftMapper;
 import com.hrms.attendance_service.application.service.ShiftService;
-import com.hrms.attendance_service.common.api.ApiResponse;
+import com.hrms.common.api.ApiResponse;
 import com.hrms.attendance_service.domain.model.Shift;
 
 import jakarta.validation.Valid;

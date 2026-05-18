@@ -30,10 +30,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users", indexes = {
-    @Index(name = "idx_employee_id", columnList = "employee_id", unique = true),
-    @Index(name = "idx_username", columnList = "username")
-})
+@Table(name = "users", indexes = { @Index(name = "idx_username", columnList = "username", unique = true) })
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -44,22 +41,10 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    /**
-     * Employee ID from Employee Service
-     * Used for login instead of username
-     * This is the primary identifier for authentication
-     */
-    @Column(nullable = false, unique = true, name = "employee_id", length = 20)
-    private String employeeId;
-
-    /**
-     * Username field (kept for backward compatibility)
-     * May be same as employeeId or derived from it
-     */
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String username;
 
-    @Column
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -82,11 +67,7 @@ public class User implements UserDetails {
     private Boolean credentialsNonExpired = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 

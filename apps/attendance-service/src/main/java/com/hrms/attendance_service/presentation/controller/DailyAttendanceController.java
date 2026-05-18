@@ -3,7 +3,7 @@ package com.hrms.attendance_service.presentation.controller;
 import com.hrms.attendance_service.application.dto.DailyAttendanceDTO;
 import com.hrms.attendance_service.application.mapper.DailyAttendanceMapper;
 import com.hrms.attendance_service.application.service.DailyAttendanceService;
-import com.hrms.attendance_service.common.api.ApiResponse;
+import com.hrms.common.api.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
 

@@ -3,7 +3,7 @@ package com.hrms.attendance_service.presentation.controller;
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
 import com.hrms.attendance_service.application.service.AttendanceService;
 import com.hrms.attendance_service.application.service.VerificationEngineService;
-import com.hrms.attendance_service.common.api.ApiResponse;
+import com.hrms.common.api.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
 

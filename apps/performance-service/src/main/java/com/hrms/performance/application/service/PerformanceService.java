@@ -22,7 +22,7 @@ import com.hrms.performance.application.dto.PerformanceGoalResponse;
 import com.hrms.performance.application.dto.PerformanceReportResponse;
 import com.hrms.performance.application.dto.SelfAppraisalRequest;
 import com.hrms.performance.application.dto.SelfAppraisalResponse;
-import com.hrms.performance.common.exceptions.ResourceNotFoundException;
+import com.hrms.common.exception.ResourceNotFoundException;
 import com.hrms.performance.domain.model.AppraisalCycle;
 import com.hrms.performance.domain.model.AppraisalTemplate;
 import com.hrms.performance.domain.model.FeedbackEntry;

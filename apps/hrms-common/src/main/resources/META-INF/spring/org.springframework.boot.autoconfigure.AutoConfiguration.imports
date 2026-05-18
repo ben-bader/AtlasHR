@@ -1,0 +1,4 @@
+com.hrms.common.autoconfigure.HrmsDefaultsAutoConfig
+com.hrms.common.autoconfigure.HrmsRabbitAutoConfig
+com.hrms.common.autoconfigure.HrmsExceptionAutoConfig
+com.hrms.common.autoconfigure.HrmsSecurityAutoConfig

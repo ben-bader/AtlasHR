@@ -12,9 +12,6 @@ import com.hrms.auth.domain.model.User;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
-    Optional<User> findByEmployeeId(String employeeId);
-    
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
-    Boolean existsByEmployeeId(String employeeId);
 }

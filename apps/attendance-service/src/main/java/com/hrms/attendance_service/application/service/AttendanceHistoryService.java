@@ -1,7 +1,7 @@
 package com.hrms.attendance_service.application.service;
 
 import com.hrms.attendance_service.common.enums.AttendanceAction;
-import com.hrms.attendance_service.common.exceptions.ResourceNotFoundException;
+import com.hrms.common.exception.ResourceNotFoundException;
 import com.hrms.attendance_service.domain.model.AttendanceHistory;
 import com.hrms.attendance_service.domain.repository.AttendanceHistoryRepository;
 

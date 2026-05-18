@@ -2,8 +2,8 @@ package com.hrms.attendance_service.application.service;
 
 import com.hrms.attendance_service.application.dto.AttendanceVerificationRequestDTO;
 import com.hrms.attendance_service.common.enums.AttendanceStatus;
-import com.hrms.attendance_service.common.exceptions.BadRequestException;
-import com.hrms.attendance_service.common.exceptions.ResourceNotFoundException;
+import com.hrms.common.exception.BadRequestException;
+import com.hrms.common.exception.ResourceNotFoundException;
 import com.hrms.attendance_service.common.utils.JsonMapperUtil;
 import com.hrms.attendance_service.domain.model.Attendance;
 import com.hrms.attendance_service.domain.model.Shift;

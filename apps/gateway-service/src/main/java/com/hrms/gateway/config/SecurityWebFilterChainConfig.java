@@ -8,7 +8,6 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
-import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import org.slf4j.Logger;
@@ -37,19 +36,15 @@ public class SecurityWebFilterChainConfig {
 	 * Main security filter chain for WebFlux
 	 * 
 	 * FIXED (BUG #4): Changed from .anyExchange().authenticated() to .permitAll()
-	 * FIXED (BUG #8): Added CORS filter explicitly with .and().cors()
 	 * 
 	 * Reason: JwtAuthenticationFilter (order -1 global filter) is the REAL security layer.
 	 * Spring Security's .authenticated() runs at order 0 BEFORE routing happens.
 	 * Two-layer auth causes conflicts and 401 errors even with valid JWT.
 	 * 
-	 * For CORS: CorsWebFilter (Spring's WebFilter) needs to run BEFORE security filters
-	 * to properly intercept and respond to preflight OPTIONS requests.
-	 * 
 	 * Order of execution:
-	 * 1. CorsWebFilter intercepts OPTIONS preflight and responds with CORS headers
+	 * 1. CorsConfigurationSource handles preflight OPTIONS
 	 * 2. JwtAuthenticationFilter validates JWT (global filter at order -1)
-	 * 3. SecurityWebFilterChain permits all (just auth checks)
+	 * 3. SecurityWebFilterChain permits all (just CORS/basic setup)
 	 * 4. Request routed to downstream service
 	 * 5. Microservices trust X-User-* headers injected by gateway
 	 */
@@ -68,18 +63,6 @@ public class SecurityWebFilterChainConfig {
 				.anyExchange().permitAll()); // JwtAuthenticationFilter handles auth
 
 		return http.build();
-	}
-
-	/**
-	 * Explicit CORS Web Filter bean
-	 * 
-	 * Ensures CORS runs at WebFilter level (order before -1) rather than 
-	 * relying on SecurityWebFilterChain's cors() config alone.
-	 * This guarantees preflight OPTIONS requests are handled correctly.
-	 */
-	@Bean
-	public org.springframework.web.cors.reactive.CorsWebFilter corsWebFilter() {
-		return new org.springframework.web.cors.reactive.CorsWebFilter(corsConfigurationSource());
 	}
 
 	/**

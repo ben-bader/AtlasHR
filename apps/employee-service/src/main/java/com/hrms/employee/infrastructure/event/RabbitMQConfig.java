@@ -4,18 +4,16 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Employee-service queue and binding definitions.
+ * The shared exchange, JSON converter, and RabbitTemplate are provided by hrms-common.
+ */
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String EXCHANGE_NAME = "hrms.exchange";
     public static final String QUEUE_NAME = "employee.user.queue";
     public static final String USER_CREATED_ROUTING_KEY = "user.created";
     public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
-
-    @Bean
-    public TopicExchange hrmTopicExchange() {
-        return new TopicExchange(EXCHANGE_NAME, true, false);
-    }
 
     @Bean
     public Queue employeeUserQueue() {
@@ -23,16 +21,16 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding bindUserCreatedQueue(Queue employeeUserQueue, TopicExchange hrmTopicExchange) {
+    public Binding bindUserCreatedQueue(Queue employeeUserQueue, TopicExchange hrmsTopicExchange) {
         return BindingBuilder.bind(employeeUserQueue)
-                .to(hrmTopicExchange)
+                .to(hrmsTopicExchange)
                 .with(USER_CREATED_ROUTING_KEY);
     }
 
     @Bean
-    public Binding bindUserDeletedQueue(Queue employeeUserQueue, TopicExchange hrmTopicExchange) {
+    public Binding bindUserDeletedQueue(Queue employeeUserQueue, TopicExchange hrmsTopicExchange) {
         return BindingBuilder.bind(employeeUserQueue)
-                .to(hrmTopicExchange)
+                .to(hrmsTopicExchange)
                 .with(USER_DELETED_ROUTING_KEY);
     }
 }
